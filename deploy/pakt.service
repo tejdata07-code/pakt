@@ -1,0 +1,74 @@
+# PAKT — systemd unit.
+#
+#   sudo cp deploy/pakt.service /etc/systemd/system/pakt.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now pakt
+#   journalctl -u pakt -f
+#
+# Restart=always is not a nicety. The 72h auto-release and the 7-day dispute
+# SLA are enforced by a 60-second timer inside this process — if it dies and
+# stays dead, deals silently stop paying out on time.
+
+[Unit]
+Description=PAKT API
+Documentation=https://github.com/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pakt
+Group=pakt
+WorkingDirectory=/opt/pakt
+EnvironmentFile=/etc/pakt/pakt.env
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=3
+
+# SIGTERM is handled: the server stops accepting, closes the SQLite handle so
+# the WAL is checkpointed, then exits. Give it room to finish.
+KillSignal=SIGTERM
+TimeoutStopSec=20
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pakt
+
+# ---- sandboxing ----
+# This process handles money and holds password hashes. It has no business
+# reading the rest of the filesystem, gaining privileges, or loading modules.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+# The only writable path. ProtectSystem=strict makes everything else read-only,
+# including /opt/pakt — so the code cannot rewrite itself.
+ReadWritePaths=/var/lib/pakt
+
+# ---- resource ceilings ----
+LimitNOFILE=4096
+MemoryMax=1G
+TasksMax=128
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,50 @@
+# PAKT — Caddyfile. Automatic HTTPS from Let's Encrypt, no certificate work.
+#
+#   sudo caddy run --config /etc/caddy/Caddyfile
+#   (or: sudo systemctl enable --now caddy)
+#
+# The hostname below is a placeholder that deploy/bootstrap.sh rewrites. If you
+# are editing this by hand, replace it with your own registered subdomain.
+#
+# It must ALREADY resolve to this machine's public IP before Caddy starts —
+# Let's Encrypt proves the certificate by fetching from that name over port 80,
+# so DNS has to be live first:   dig +short <your-name>.duckdns.org
+#
+# Note: pakt.duckdns.org is already registered to someone else. DuckDNS names
+# are global and first-come-first-served, so pick one that is actually free.
+
+PAKT_HOSTNAME_PLACEHOLDER {
+	# The app binds to loopback only (PAKT_HOST=127.0.0.1), so this proxy is
+	# the single way in. That is what makes PAKT_TRUST_PROXY=1 safe: nothing
+	# can reach the origin directly to forge an X-Forwarded-For.
+	reverse_proxy 127.0.0.1:4000 {
+		header_up X-Real-IP {remote_host}
+	}
+
+	encode gzip zstd
+
+	# Caddy sets X-Forwarded-For and X-Forwarded-Proto on its own. The app
+	# reads the RIGHTMOST entry of the chain, which is the address Caddy
+	# actually observed — a client-supplied forgery sits to the left of it
+	# and is ignored. See lib/net.js.
+
+	# The app already emits CSP, HSTS, Referrer-Policy and the rest per
+	# response (lib/net.js). Only the ones Caddy is better placed to own
+	# live here.
+	header {
+		-Server
+		Strict-Transport-Security "max-age=15552000; includeSubDomains"
+	}
+
+	# Requests larger than the app's 64 KB body cap never need to reach it.
+	request_body {
+		max_size 128KB
+	}
+
+	log {
+		output file /var/log/caddy/pakt.log {
+			roll_size 10MB
+			roll_keep 5
+		}
+	}
+}

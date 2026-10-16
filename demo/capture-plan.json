@@ -1,0 +1,93 @@
+[
+ {
+  "name": "home",
+  "url": "http://localhost:4500/",
+  "js": "window.scrollTo(0,0)",
+  "settle": 2600,
+  "after": 1800
+ },
+ {
+  "name": "b-orbit",
+  "url": "http://localhost:4500/app",
+  "js": "document.getElementById(\"welcome\").classList.add(\"gone\");window.scrollTo(0,0);document.getElementById(\"roleBrand\").click();show(\"orbit\");",
+  "settle": 2000,
+  "after": 1700
+ },
+ {
+  "name": "b-table",
+  "url": "http://localhost:4500/app",
+  "js": "document.getElementById(\"welcome\").classList.add(\"gone\");window.scrollTo(0,0);document.getElementById(\"roleBrand\").click();show(\"table\");",
+  "settle": 2000,
+  "after": 1700
+ },
+ {
+  "name": "b-vault",
+  "url": "http://localhost:4500/app",
+  "js": "document.getElementById(\"welcome\").classList.add(\"gone\");window.scrollTo(0,0);document.getElementById(\"roleBrand\").click();show(\"vault\");",
+  "settle": 2000,
+  "after": 1700
+ },
+ {
+  "name": "b-signals",
+  "url": "http://localhost:4500/app",
+  "js": "document.getElementById(\"welcome\").classList.add(\"gone\");window.scrollTo(0,0);document.getElementById(\"roleBrand\").click();show(\"signals\");",
+  "settle": 2000,
+  "after": 1700
+ },
+ {
+  "name": "b-dossier",
+  "url": "http://localhost:4500/app",
+  "js": "document.getElementById(\"welcome\").classList.add(\"gone\");window.scrollTo(0,0);document.getElementById(\"roleBrand\").click();show(\"orbit\");setTimeout(()=>{document.querySelector(\"#creatorGrid .ccard, #creatorGrid > *\").click();},700);",
+  "settle": 2200,
+  "after": 2200
+ },
+ {
+  "name": "c-wallet",
+  "url": "http://localhost:4500/app",
+  "js": "document.getElementById(\"welcome\").classList.add(\"gone\");window.scrollTo(0,0);document.getElementById(\"roleCreator\").click();show(\"wallet\");",
+  "settle": 2000,
+  "after": 1700
+ },
+ {
+  "name": "c-table",
+  "url": "http://localhost:4500/app",
+  "js": "document.getElementById(\"welcome\").classList.add(\"gone\");window.scrollTo(0,0);document.getElementById(\"roleCreator\").click();show(\"table\");",
+  "settle": 2000,
+  "after": 1700
+ },
+ {
+  "name": "c-pulse",
+  "url": "http://localhost:4500/app",
+  "js": "document.getElementById(\"welcome\").classList.add(\"gone\");window.scrollTo(0,0);document.getElementById(\"roleCreator\").click();show(\"pulse\");",
+  "settle": 2000,
+  "after": 1700
+ },
+ {
+  "name": "c-lab",
+  "url": "http://localhost:4500/app",
+  "js": "document.getElementById(\"welcome\").classList.add(\"gone\");window.scrollTo(0,0);document.getElementById(\"roleCreator\").click();show(\"lab\");",
+  "settle": 2000,
+  "after": 1700
+ },
+ {
+  "name": "c-ideas",
+  "url": "http://localhost:4500/app",
+  "js": "document.getElementById(\"welcome\").classList.add(\"gone\");window.scrollTo(0,0);document.getElementById(\"roleCreator\").click();show(\"ideas\");",
+  "settle": 2000,
+  "after": 1700
+ },
+ {
+  "name": "c-kit",
+  "url": "http://localhost:4500/app",
+  "js": "document.getElementById(\"welcome\").classList.add(\"gone\");window.scrollTo(0,0);document.getElementById(\"roleCreator\").click();show(\"kit\");",
+  "settle": 2000,
+  "after": 1700
+ },
+ {
+  "name": "forge",
+  "url": "http://localhost:4500/forge",
+  "js": "window.scrollTo(0,0)",
+  "settle": 3000,
+  "after": 1800
+ }
+]

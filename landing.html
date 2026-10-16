@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAKT — Post today. Paid today.</title>
+<meta name="description" content="The creator–brand exchange where money can't get lost.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;700;900&family=Outfit:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root{
+    --void:#0B0817; --nebula:#151029; --panel:#1B1535;
+    --violet:#7C5CFF; --gold:#FFC24B; --gold-hot:#FFD98A;
+    --ink:#EDEAFF; --dim:#9B93C4; --coral:#FF5C7A;
+    --line:rgba(155,147,196,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:auto}
+  body{background:var(--void);color:var(--ink);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;line-height:1.6}
+  ::selection{background:var(--gold);color:var(--void)}
+  h1,h2,h3{font-family:'Unbounded',sans-serif;line-height:1.06;font-weight:700}
+  .mono{font-family:'Space Mono',monospace}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.34em;text-transform:uppercase;color:var(--gold)}
+  .eyebrow.violet{color:var(--violet)} .eyebrow.coral{color:var(--coral)}
+
+  /* ================= PRELOADER ================= */
+  #loader{position:fixed;inset:0;background:var(--void);z-index:100;display:flex;align-items:center;justify-content:center;flex-direction:column}
+  #loader .word{display:flex;overflow:hidden}
+  #loader .word b{font-family:'Unbounded',sans-serif;font-weight:900;font-size:clamp(3rem,10vw,7rem);transform:translateY(115%);letter-spacing:.02em}
+  #loader .word b.g{color:var(--gold)}
+  #loader .pct{position:absolute;bottom:8vh;right:8vw;font-family:'Space Mono',monospace;font-size:clamp(2rem,6vw,4rem);color:var(--dim)}
+  #loader .bar{position:absolute;bottom:6vh;left:8vw;right:8vw;height:1px;background:var(--line)}
+  #loader .bar i{display:block;height:100%;width:0;background:var(--gold);box-shadow:0 0 18px var(--gold)}
+
+  /* ================= CURSOR ================= */
+  .cursor,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:99;border-radius:50%;will-change:transform}
+  .cursor{width:8px;height:8px;background:var(--gold);margin:-4px 0 0 -4px}
+  .cursor-ring{width:38px;height:38px;border:1px solid rgba(255,194,75,.55);margin:-19px 0 0 -19px;transition:width .25s,height .25s,margin .25s,border-color .25s,background .25s}
+  .cursor-ring.big{width:74px;height:74px;margin:-37px 0 0 -37px;background:rgba(255,194,75,.08);border-color:var(--gold)}
+  @media (hover:none){.cursor,.cursor-ring{display:none}}
+
+  /* ================= GRAIN + PROGRESS ================= */
+  .grain{position:fixed;inset:-100%;z-index:60;pointer-events:none;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 8s steps(10) infinite}
+  @keyframes grain{0%,100%{transform:translate(0,0)}10%{transform:translate(-5%,-8%)}30%{transform:translate(4%,6%)}50%{transform:translate(-7%,3%)}70%{transform:translate(6%,-4%)}90%{transform:translate(-3%,7%)}}
+  #progress{position:fixed;top:0;left:0;height:2px;background:var(--gold);width:0%;z-index:70;box-shadow:0 0 12px var(--gold)}
+
+  /* ================= NAV ================= */
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;mix-blend-mode:difference}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:76px;max-width:none;padding:0 40px}
+  .logo{font-family:'Unbounded',sans-serif;font-weight:900;font-size:1.2rem;letter-spacing:.06em}
+  .logo b{color:var(--gold)}
+  .nav-cta{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.24em}
+
+  /* ================= BUTTONS ================= */
+  .btn{display:inline-flex;align-items:center;gap:10px;font-family:'Unbounded',sans-serif;font-weight:500;font-size:.82rem;letter-spacing:.05em;padding:17px 34px;border-radius:100px;border:1px solid var(--line);background:none;color:var(--ink);cursor:pointer;position:relative;overflow:hidden;transition:border-color .3s}
+  .btn span{position:relative;z-index:1}
+  .btn::after{content:'';position:absolute;inset:0;background:var(--gold);border-radius:100px;transform:scaleX(0);transform-origin:left;transition:transform .38s cubic-bezier(.6,0,.2,1)}
+  .btn:hover::after{transform:scaleX(1)}
+  .btn:hover span{color:#231a05;transition:color .2s .1s}
+  .btn.gold{background:var(--gold);color:#231a05;border-color:var(--gold);box-shadow:0 0 40px rgba(255,194,75,.3)}
+  .btn.gold::after{background:var(--ink)}
+  .btn.big{font-size:1rem;padding:22px 46px}
+
+  /* ================= HERO ================= */
+  .hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden}
+  #stream{position:absolute;inset:0;width:100%;height:100%}
+  .aurora{position:absolute;width:60vw;height:60vw;border-radius:50%;filter:blur(120px);opacity:.35;pointer-events:none}
+  .aurora.a1{background:#3a2a8f;top:-20vw;left:-15vw}
+  .aurora.a2{background:#6b3f14;bottom:-25vw;right:-12vw;opacity:.28}
+  .hero-inner{position:relative;z-index:2;padding:140px 0 90px;width:100%}
+  .hero h1{font-size:clamp(2.9rem,9vw,7.2rem);font-weight:900;letter-spacing:-.01em;text-transform:uppercase}
+  .hero h1 .line{display:block;overflow:hidden}
+  .hero h1 .line span{display:inline-block}
+  .hero h1 .paid{color:var(--gold);text-shadow:0 0 70px rgba(255,194,75,.55)}
+  .hero p.lead{max-width:540px;margin:30px 0 40px;font-size:1.16rem;color:var(--dim)}
+  .hero p.lead b{color:var(--ink);font-weight:500}
+  .hero-ctas{display:flex;gap:16px;flex-wrap:wrap}
+  .live-counter{margin-top:60px;display:inline-flex;flex-direction:column;gap:4px;padding:20px 26px;border:1px solid var(--line);border-radius:18px;background:rgba(21,16,41,.55);backdrop-filter:blur(10px)}
+  .live-counter .amt{font-family:'Space Mono',monospace;font-size:2rem;color:var(--gold)}
+  .live-counter .lbl{font-size:.78rem;color:var(--dim);display:flex;align-items:center;gap:8px}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .scrollhint{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.34em;color:var(--dim);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:3}
+  .scrollhint i{width:1px;height:44px;background:linear-gradient(var(--gold),transparent);display:block;animation:drip 1.8s infinite}
+  @keyframes drip{0%{transform:scaleY(0);transform-origin:top}55%{transform:scaleY(1);transform-origin:top}56%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  /* ================= MARQUEE ================= */
+  .marquee{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;padding:22px 0;background:var(--nebula)}
+  .marquee-track{display:flex;gap:60px;white-space:nowrap;width:max-content}
+  .marquee .item{font-family:'Unbounded',sans-serif;font-weight:900;font-size:clamp(1.6rem,4vw,3rem);text-transform:uppercase;color:transparent;-webkit-text-stroke:1px rgba(237,234,255,.35)}
+  .marquee .item.solid{color:var(--gold);-webkit-text-stroke:0}
+  .marquee.paid-ticker{background:var(--void);padding:14px 0}
+  .marquee.paid-ticker .tick{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--dim)}
+  .marquee.paid-ticker .tick b{color:var(--gold);font-weight:400}
+
+  /* ================= PROBLEM ================= */
+  .problem{position:relative;padding:24vh 0;background:linear-gradient(180deg,var(--void),#1a0d16 50%,var(--void));overflow:hidden}
+  .big-stat{font-family:'Unbounded',sans-serif;font-weight:900;font-size:clamp(6rem,24vw,19rem);color:var(--coral);line-height:.9;text-shadow:0 0 120px rgba(255,92,122,.45);will-change:transform}
+  .problem .sub{max-width:460px;color:var(--dim);font-size:1.15rem;margin-top:26px}
+  .problem .sub b{color:var(--ink);font-weight:500}
+  .terms{margin-top:52px;display:flex;flex-direction:column;gap:12px;max-width:560px}
+  .term{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:14px;padding:17px 24px;font-family:'Space Mono',monospace;font-size:.9rem;background:rgba(11,8,23,.5)}
+  .term span:last-child{color:var(--coral)}
+  .term.pakt{border-color:rgba(255,194,75,.55);background:rgba(255,194,75,.06)}
+  .term.pakt span:last-child{color:var(--gold)}
+
+  /* ================= VAULT (pinned scrub scene) ================= */
+  #vaultScene{position:relative;background:var(--void)}
+  .vault-stage{height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .vault-bg{position:absolute;width:80vmin;height:80vmin;border-radius:50%;background:radial-gradient(circle,rgba(124,92,255,.14),transparent 65%);filter:blur(30px)}
+  .vault-center{position:relative;text-align:center;z-index:2}
+  .vaultring{position:relative;width:min(56vmin,420px);height:min(56vmin,420px);margin:0 auto}
+  .vaultring svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+  .vaultring .orbitdash{animation:spinorbit 30s linear infinite;transform-origin:center}
+  @keyframes spinorbit{to{transform:rotate(360deg)}}
+  .vault-amt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+  .vault-amt b{font-family:'Space Mono',monospace;font-size:clamp(1.8rem,5vmin,2.8rem);font-weight:400}
+  .vault-amt span{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.4em;color:var(--violet)}
+  .vault-caption{position:absolute;bottom:9vh;left:0;right:0;text-align:center;z-index:3}
+  .vault-caption .step{position:absolute;left:0;right:0;bottom:0;opacity:0}
+  .vault-caption h3{font-size:clamp(1.2rem,3.4vw,2rem);text-transform:uppercase}
+  .vault-caption p{color:var(--dim);max-width:480px;margin:10px auto 0;font-size:.98rem}
+  .vault-head{position:absolute;top:10vh;left:0;right:0;text-align:center;z-index:3}
+  .vault-head h2{font-size:clamp(1.6rem,4.4vw,3rem);text-transform:uppercase;margin-top:14px}
+  #vaultParticles{position:absolute;inset:0;pointer-events:none;z-index:1}
+
+  /* ================= CONSTELLATION ================= */
+  .constellation{background:var(--nebula);padding:20vh 0;position:relative;overflow:hidden}
+  .ch-head{max-width:760px;margin-bottom:60px}
+  .ch-head h2{font-size:clamp(2rem,5.4vw,3.6rem);margin:18px 0 20px;text-transform:uppercase}
+  .ch-head h2 .l{display:block;overflow:hidden}
+  .ch-head h2 .l span{display:inline-block}
+  .ch-head p{color:var(--dim);font-size:1.1rem}
+  .ch-head p b{color:var(--ink);font-weight:500}
+  .const-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
+  #miniOrbit{width:100%;height:440px;border-radius:26px;border:1px solid var(--line);background:radial-gradient(ellipse at 50% 40%,#1e1745,var(--void) 78%);cursor:crosshair}
+  .legend{display:flex;gap:22px;margin-top:16px;font-family:'Space Mono',monospace;font-size:.7rem;color:var(--dim)}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:middle}
+  .score-card{border:1px solid var(--line);border-radius:22px;padding:30px;background:var(--panel);transform-style:preserve-3d;will-change:transform}
+  .score-card .handle{font-weight:500;font-size:1.1rem}
+  .score-row{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:.85rem;color:var(--dim);padding:12px 0;border-bottom:1px solid var(--line)}
+  .score-row:last-child{border:none}
+  .score-row .v{color:var(--ink)} .score-row .v.gold{color:var(--gold)}
+
+  /* ================= SYSTEMS (horizontal scroll) ================= */
+  #systems{position:relative;background:var(--void)}
+  .sys-pin{height:100vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+  .sys-title{padding:0 40px;margin-bottom:44px}
+  .sys-title h2{font-size:clamp(1.8rem,4.8vw,3.2rem);text-transform:uppercase;margin-top:12px}
+  .sys-track{display:flex;gap:22px;padding:0 40px;width:max-content;will-change:transform}
+  .sys{width:min(400px,78vw);flex-shrink:0;border:1px solid var(--line);border-radius:26px;padding:38px 32px;background:linear-gradient(160deg,var(--panel),rgba(27,21,53,.35));position:relative;overflow:hidden;transition:border-color .3s}
+  .sys:hover{border-color:var(--violet)}
+  .sys .n{font-family:'Space Mono',monospace;font-size:.66rem;color:var(--violet);letter-spacing:.24em}
+  .sys .huge{position:absolute;right:-10px;bottom:-34px;font-family:'Unbounded',sans-serif;font-weight:900;font-size:7rem;color:rgba(124,92,255,.08);pointer-events:none}
+  .sys h3{font-size:1.35rem;margin:60px 0 14px;font-weight:500;line-height:1.3}
+  .sys p{font-size:.95rem;color:var(--dim)}
+  .sys.gold-card{border-color:rgba(255,194,75,.5);background:linear-gradient(160deg,rgba(255,194,75,.1),var(--panel))}
+  .sys.gold-card .n,.sys.gold-card .huge{color:rgba(255,194,75,.9)}
+  .sys.gold-card .huge{color:rgba(255,194,75,.1)}
+
+  /* ================= CTA ================= */
+  .cta{position:relative;text-align:center;padding:26vh 0;overflow:hidden}
+  .cta h2{font-size:clamp(2.4rem,8vw,6rem);text-transform:uppercase;font-weight:900}
+  .cta h2 .l{display:block;overflow:hidden}
+  .cta h2 .l span{display:inline-block}
+  .cta h2 .g{color:var(--gold);text-shadow:0 0 80px rgba(255,194,75,.5)}
+  .cta p{color:var(--dim);margin:26px auto 48px;max-width:480px;font-size:1.12rem}
+  footer{border-top:1px solid var(--line);padding:38px 0;color:var(--dim);font-size:.85rem}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+  @media (max-width:900px){
+    .const-grid{grid-template-columns:1fr}
+    nav .wrap{padding:0 22px}
+    .vault-caption{bottom:5vh}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .grain,#loader{display:none}
+    *{animation:none!important}
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div class="grain"></div>
+<div class="cursor"></div><div class="cursor-ring"></div>
+
+<!-- ============ PRELOADER ============ -->
+<div id="loader">
+  <div class="word"><b>P</b><b>A</b><b class="g">K</b><b class="g">T</b></div>
+  <div class="pct mono" id="pct">00</div>
+  <div class="bar"><i id="loadbar"></i></div>
+</div>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#">PA<b>KT</b></a>
+    <a class="nav-cta mono hoverable" href="app.html">ENTER THE EXCHANGE →</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="aurora a1" data-depth="30"></div>
+  <div class="aurora a2" data-depth="-40"></div>
+  <canvas id="stream" aria-hidden="true"></canvas>
+  <div class="wrap hero-inner">
+    <p class="eyebrow reveal-el">The creator–brand exchange</p>
+    <h1>
+      <span class="line"><span>Post today.</span></span>
+      <span class="line"><span class="paid">Paid today.</span></span>
+    </h1>
+    <p class="lead reveal-el">Every deal is <b>locked in escrow before work begins</b> and released the second content goes live. No Net-90. No ghosting. No maybe.</p>
+    <div class="hero-ctas reveal-el">
+      <a class="btn gold big magnetic hoverable" href="app.html"><span>I'm a brand — find creators</span></a>
+      <a class="btn big magnetic hoverable" href="app.html"><span>I'm a creator — get paid</span></a>
+    </div>
+    <div class="live-counter reveal-el">
+      <span class="amt mono" id="liveAmt">$284,913</span>
+      <span class="lbl"><span class="pulse"></span> released to creators in the last hour</span>
+    </div>
+  </div>
+  <div class="scrollhint">SCROLL<i></i></div>
+</header>
+
+<!-- ============ BIG MARQUEE ============ -->
+<div class="marquee">
+  <div class="marquee-track" data-speed="1">
+    <span class="item">Post today</span><span class="item solid">✦</span>
+    <span class="item">Paid today</span><span class="item solid">✦</span>
+    <span class="item">Zero ghosting</span><span class="item solid">✦</span>
+    <span class="item">Post today</span><span class="item solid">✦</span>
+    <span class="item">Paid today</span><span class="item solid">✦</span>
+    <span class="item">Zero ghosting</span><span class="item solid">✦</span>
+  </div>
+</div>
+
+<!-- ============ PROBLEM ============ -->
+<section class="problem">
+  <div class="wrap">
+    <p class="eyebrow coral reveal-el">The industry's open secret</p>
+    <div class="big-stat" id="bigStat">87%</div>
+    <p class="sub reveal-el">of creators have been paid late — <b>or never</b>. The money exists. It just sits in someone else's account for months.</p>
+    <div class="terms mono reveal-el">
+      <div class="term"><span>Industry standard</span><span>NET 30–90 DAYS</span></div>
+      <div class="term"><span>Agencies holding funds</span><span>UP TO 12 MONTHS</span></div>
+      <div class="term pakt"><span>PAKT</span><span>0.8 SECONDS</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VAULT — PINNED CINEMATIC SCENE ============ -->
+<section id="vaultScene">
+  <div class="vault-stage">
+    <div class="vault-bg" id="vaultBg"></div>
+    <canvas id="vaultParticles"></canvas>
+    <div class="vault-head">
+      <p class="eyebrow">System 01 — Escrow · keep scrolling</p>
+      <h2>The vault holds.<br>The vault releases.</h2>
+    </div>
+    <div class="vault-center">
+      <div class="vaultring">
+        <svg viewBox="0 0 420 420">
+          <circle cx="210" cy="210" r="170" fill="none" stroke="rgba(124,92,255,.15)" stroke-width="3"/>
+          <circle class="orbitdash" cx="210" cy="210" r="196" fill="none" stroke="rgba(124,92,255,.28)" stroke-width="1" stroke-dasharray="4 14"/>
+          <circle id="vaultArc" cx="210" cy="210" r="170" fill="none" stroke="#7C5CFF" stroke-width="7" stroke-linecap="round" stroke-dasharray="1068" stroke-dashoffset="1068" style="filter:drop-shadow(0 0 14px #7C5CFF)"/>
+        </svg>
+        <div class="vault-amt"><b id="vAmt">$180.00</b><span id="vState">LOCKED</span></div>
+      </div>
+    </div>
+    <div class="vault-caption">
+      <div class="step" id="vs1">
+        <h3>01 — The brand locks the money first</h3>
+        <p>Full amount into escrow before the creator lifts a finger. Work starts because the money is already real.</p>
+      </div>
+      <div class="step" id="vs2">
+        <h3 style="color:var(--ink)">02 — Content goes live, machines verify</h3>
+        <p>Post URL confirmed. #ad disclosure auto-checked. Brief matched. No humans required, no favors possible.</p>
+      </div>
+      <div class="step" id="vs3">
+        <h3 style="color:var(--gold)">03 — The vault opens. Instantly.</h3>
+        <p>Payout fires the same second as verification — and if a brand goes silent for 72 hours, silence pays the creator automatically.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAID TICKER ============ -->
+<div class="marquee paid-ticker">
+  <div class="marquee-track" data-speed="-.6" id="tickerTrack"></div>
+</div>
+
+<!-- ============ CONSTELLATION ============ -->
+<section class="constellation" id="constellationSec">
+  <div class="wrap">
+    <div class="ch-head">
+      <p class="eyebrow violet reveal-el">System 02 — Discovery</p>
+      <h2>
+        <span class="l"><span>No lists. No scrolling.</span></span>
+        <span class="l"><span>A living constellation.</span></span>
+      </h2>
+      <p class="reveal-el">Creators orbit by niche and audience. Brighter means more authentic — <b>every profile carries a fraud score</b>, computed in the open, before you spend a rupee.</p>
+    </div>
+    <div class="const-grid">
+      <div class="reveal-el">
+        <canvas id="miniOrbit" class="hoverable"></canvas>
+        <div class="legend">
+          <span><span class="dot" style="background:var(--gold)"></span>VERIFIED 80+</span>
+          <span><span class="dot" style="background:var(--violet)"></span>WATCH 55–79</span>
+          <span><span class="dot" style="background:var(--coral)"></span>HIGH RISK</span>
+        </div>
+      </div>
+      <div class="score-card reveal-el" id="scoreCard">
+        <p class="eyebrow" style="margin-bottom:14px">Creator dossier</p>
+        <div class="handle" id="scHandle">@ria.eats · Food · Hyderabad</div>
+        <div style="margin-top:14px">
+          <div class="score-row"><span>Authenticity score</span><span class="v gold" id="scScore">92 / 100</span></div>
+          <div class="score-row"><span>True engagement</span><span class="v" id="scEng">6.4%</span></div>
+          <div class="score-row"><span>Audience</span><span class="v" id="scFol">42,300</span></div>
+          <div class="score-row"><span>Fair rate benchmark</span><span class="v" id="scRate">$120 – $400 / post</span></div>
+          <div class="score-row"><span>Deals completed</span><span class="v" id="scDeals">31 · zero disputes</span></div>
+        </div>
+        <p style="margin-top:18px;font-size:.85rem;color:var(--dim)">Tap any star — the dossier updates live.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SYSTEMS — HORIZONTAL SCROLL ============ -->
+<section id="systems">
+  <div class="sys-pin">
+    <div class="sys-title">
+      <p class="eyebrow">All systems · keep scrolling →</p>
+      <h2>Eight guarantees. Zero fine print.</h2>
+    </div>
+    <div class="sys-track" id="sysTrack">
+      <div class="sys gold-card"><span class="n">SYS·01</span><span class="huge">01</span><h3>Instant payouts</h3><p>Verification and payout are one atomic event. A creator has never waited on PAKT — the system makes waiting impossible.</p></div>
+      <div class="sys"><span class="n">SYS·02</span><span class="huge">02</span><h3>Ghost-proof escrow</h3><p>72 hours of brand silence after content is live = automatic release to the creator. Silence pays.</p></div>
+      <div class="sys"><span class="n">SYS·03</span><span class="huge">03</span><h3>Published dispute rules</h3><p>Content live + compliant + brief met → creator wins. Deterministic. No humans, no favorites.</p></div>
+      <div class="sys"><span class="n">SYS·04</span><span class="huge">04</span><h3>ROI theater</h3><p>Every deal ships with a tracking link. Clicks, conversions, revenue, ROAS — per creator, per post.</p></div>
+      <div class="sys"><span class="n">SYS·05</span><span class="huge">05</span><h3>Fraud scores, free</h3><p>Authenticity scoring on every profile with human-readable flags. Trust is not a paid add-on here.</p></div>
+      <div class="sys"><span class="n">SYS·06</span><span class="huge">06</span><h3>Open rate benchmarks</h3><p>"Creators like you charge X–Y." Both sides see the same number. Negotiate from truth.</p></div>
+      <div class="sys"><span class="n">SYS·07</span><span class="huge">07</span><h3>Retainer collabs</h3><p>Turn one-off posts into monthly ambassador deals — auto-briefed, auto-renewed, auto-paid.</p></div>
+      <div class="sys gold-card"><span class="n">SYS·08</span><span class="huge">08</span><h3>Compliance autopilot</h3><p>Captions missing #ad / #sponsored are blocked before they can expose the brand. FTC & ASCI safe.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta">
+  <div class="wrap">
+    <h2>
+      <span class="l"><span>The pact is simple.</span></span>
+      <span class="l"><span class="g">Real work. Real money.</span></span>
+      <span class="l"><span class="g">Right now.</span></span>
+    </h2>
+    <p class="reveal-el">One transparent 12% fee when a deal completes. Free to join, free to browse, free to be found.</p>
+    <a class="btn gold big magnetic hoverable" href="app.html"><span>Enter the Exchange</span></a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="logo" style="font-size:.95rem">PA<b>KT</b></span>
+    <span>Escrow-locked creator deals · Demo build</span>
+    <span class="mono" style="font-size:.75rem">POST TODAY · PAID TODAY</span>
+  </div>
+</footer>
+
+<script>
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const hasGsap = typeof gsap !== 'undefined';
+if (hasGsap && typeof ScrollTrigger !== 'undefined') gsap.registerPlugin(ScrollTrigger);
+
+/* ============ PRELOADER ============ */
+(function(){
+  const loader = document.getElementById('loader');
+  if (reduced || !hasGsap){ loader.remove(); heroIn(true); return; }
+  const pct = document.getElementById('pct'), bar = document.getElementById('loadbar');
+  const letters = loader.querySelectorAll('.word b');
+  gsap.to(letters, {y: 0, duration: .9, stagger: .09, ease: 'power4.out', delay: .15});
+  const st = {v: 0};
+  gsap.to(st, {v: 100, duration: 1.9, ease: 'power2.inOut', delay: .2,
+    onUpdate(){ pct.textContent = String(Math.floor(st.v)).padStart(2,'0'); bar.style.width = st.v + '%'; },
+    onComplete(){
+      gsap.to(letters, {y: '-115%', duration: .6, stagger: .05, ease: 'power3.in'});
+      gsap.to(loader, {yPercent: -100, duration: .85, ease: 'power4.inOut', delay: .35,
+        onComplete(){ loader.remove(); }});
+      heroIn(false);
+    }});
+})();
+
+function heroIn(instant){
+  const lines = document.querySelectorAll('.hero h1 .line span');
+  const els = document.querySelectorAll('.hero .reveal-el');
+  if (!hasGsap || instant){ return; }
+  gsap.set(lines, {yPercent: 115});
+  gsap.set(els, {opacity: 0, y: 26});
+  gsap.to(lines, {yPercent: 0, duration: 1.1, stagger: .12, ease: 'power4.out', delay: 2.9});
+  gsap.to(els, {opacity: 1, y: 0, duration: .9, stagger: .1, ease: 'power3.out', delay: 3.25});
+}
+
+/* ============ CURSOR ============ */
+(function(){
+  if (matchMedia('(hover:none)').matches) return;
+  const dot = document.querySelector('.cursor'), ring = document.querySelector('.cursor-ring');
+  let mx = innerWidth/2, my = innerHeight/2, rx = mx, ry = my;
+  addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.transform = `translate(${mx}px,${my}px)`; });
+  (function loop(){ rx += (mx-rx)*.14; ry += (my-ry)*.14; ring.style.transform = `translate(${rx}px,${ry}px)`; requestAnimationFrame(loop); })();
+  document.querySelectorAll('a,button,.hoverable').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('big'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('big'));
+  });
+})();
+
+/* ============ MAGNETIC BUTTONS ============ */
+document.querySelectorAll('.magnetic').forEach(btn => {
+  btn.addEventListener('mousemove', e => {
+    const r = btn.getBoundingClientRect();
+    const x = (e.clientX - r.left - r.width/2) * .28, y = (e.clientY - r.top - r.height/2) * .34;
+    btn.style.transform = `translate(${x}px,${y}px)`;
+  });
+  btn.addEventListener('mouseleave', () => { btn.style.transform = ''; btn.style.transition = 'transform .5s cubic-bezier(.2,.9,.3,1.4)'; setTimeout(()=>btn.style.transition='',500); });
+});
+
+/* ============ PROGRESS BAR ============ */
+addEventListener('scroll', () => {
+  const h = document.documentElement;
+  document.getElementById('progress').style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%';
+}, {passive:true});
+
+/* ============ HERO CANVAS: payout stream + parallax ============ */
+const cv = document.getElementById('stream'), ctx = cv.getContext('2d');
+let W, H, particles = [], stars = [];
+function sizeHero(){ W = cv.width = cv.offsetWidth * devicePixelRatio; H = cv.height = cv.offsetHeight * devicePixelRatio; }
+sizeHero(); addEventListener('resize', sizeHero);
+for (let i = 0; i < 150; i++) stars.push({x: Math.random(), y: Math.random(), r: Math.random()*1.4+.3, tw: Math.random()*7, d: Math.random()*.6+.2});
+let px = 0, py = 0;
+addEventListener('mousemove', e => { px = (e.clientX/innerWidth - .5); py = (e.clientY/innerHeight - .5); });
+function curve(t, off){
+  const x0=.06, y0=.8, x1=.5, y1=.16+off, x2=.94, y2=.74;
+  return [((1-t)**2*x0 + 2*(1-t)*t*x1 + t*t*x2)*W, ((1-t)**2*y0 + 2*(1-t)*t*y1 + t*t*y2)*H];
+}
+function drawHero(){
+  ctx.clearRect(0,0,W,H);
+  for (const s of stars){
+    s.tw += .02;
+    ctx.globalAlpha = .22 + Math.sin(s.tw)*.16;
+    ctx.fillStyle = '#9B93C4';
+    ctx.beginPath(); ctx.arc((s.x + px*s.d*.03)*W, (s.y + py*s.d*.03)*H, s.r*devicePixelRatio, 0, 7); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  const [bx,by] = curve(0,0), [cx2,cy2] = curve(1,0);
+  for (const [x,y,c] of [[bx,by,'#7C5CFF'],[cx2,cy2,'#FFC24B']]){
+    const g = ctx.createRadialGradient(x,y,0,x,y,70*devicePixelRatio);
+    g.addColorStop(0, c); g.addColorStop(1, 'transparent');
+    ctx.globalAlpha = .55; ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x,y,70*devicePixelRatio,0,7); ctx.fill();
+    ctx.globalAlpha = 1; ctx.fillStyle = '#EDEAFF';
+    ctx.beginPath(); ctx.arc(x,y,4*devicePixelRatio,0,7); ctx.fill();
+  }
+  if (!reduced && Math.random() < .4) particles.push({t:0, speed:.0028+Math.random()*.0035, off:(Math.random()-.5)*.18, size:Math.random()*2.6+1.2});
+  particles = particles.filter(p => p.t <= 1);
+  for (const p of particles){
+    p.t += p.speed;
+    const [x,y] = curve(p.t, p.off);
+    ctx.globalAlpha = Math.sin(p.t*Math.PI)*.95;
+    ctx.fillStyle = '#FFC24B'; ctx.shadowColor = '#FFC24B'; ctx.shadowBlur = 14*devicePixelRatio;
+    ctx.beginPath(); ctx.arc(x, y, p.size*devicePixelRatio, 0, 7); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawHero);
+}
+drawHero();
+/* aurora parallax */
+if (hasGsap && !reduced) addEventListener('mousemove', () => {
+  document.querySelectorAll('.aurora').forEach(a => {
+    const d = +a.dataset.depth;
+    gsap.to(a, {x: px*d, y: py*d, duration: 1.4, ease: 'power2.out'});
+  });
+});
+
+/* ============ live counter ============ */
+let amt = 284913;
+setInterval(() => { if (reduced) return; amt += Math.floor(Math.random()*260)+40;
+  document.getElementById('liveAmt').textContent = '$' + amt.toLocaleString(); }, 1800);
+
+/* ============ marquees ============ */
+document.querySelectorAll('.marquee-track').forEach(track => {
+  if (track.id === 'tickerTrack'){
+    const names = ['@ria.eats','@fit.arjun','@meera.makes','@hyd.foodwalks','@style.by.sana','@pixel.pravah','@travel.tara','@chai.chronicles'];
+    const ticks = names.map(n => `<span class="tick">${n} <b>+$${(Math.random()*280+45).toFixed(2)}</b> · released ${(Math.random()*1.4+.4).toFixed(1)}s after verification</span>`);
+    track.innerHTML = ticks.join('') + ticks.join('');
+  }
+  if (!hasGsap || reduced) return;
+  const speed = parseFloat(track.dataset.speed || 1);
+  const w = () => track.scrollWidth / 2;
+  gsap.to(track, {x: () => -w() * Math.sign(speed), duration: () => 26/Math.abs(speed), ease: 'none', repeat: -1,
+    modifiers: {x: gsap.utils.unitize(x => parseFloat(x) % w())}});
+});
+
+/* ============ scroll reveals ============ */
+if (hasGsap && !reduced){
+  document.querySelectorAll('section .reveal-el, .ch-head .l span, .cta .l span').forEach(el => {
+    const isLine = el.parentElement.classList.contains('l');
+    gsap.set(el, isLine ? {yPercent: 115} : {opacity: 0, y: 30});
+    gsap.to(el, {
+      ...(isLine ? {yPercent: 0} : {opacity: 1, y: 0}),
+      duration: isLine ? 1 : .85, ease: isLine ? 'power4.out' : 'power3.out',
+      scrollTrigger: {trigger: el, start: 'top 88%'}
+    });
+  });
+
+  /* 87% — scale + parallax scrub */
+  gsap.fromTo('#bigStat', {scale: .55, opacity: .15}, {scale: 1, opacity: 1, ease: 'none',
+    scrollTrigger: {trigger: '.problem', start: 'top 80%', end: 'top 10%', scrub: true}});
+
+  /* ============ VAULT pinned scrub scene ============ */
+  const vaultTl = gsap.timeline({
+    scrollTrigger: {trigger: '#vaultScene', start: 'top top', end: '+=280%', pin: '.vault-stage', scrub: .6}
+  });
+  const arc = document.getElementById('vaultArc');
+  const vState = document.getElementById('vState'), vAmt = document.getElementById('vAmt');
+  vaultTl
+    .to('#vs1', {opacity: 1, duration: .8})
+    .to(arc, {strokeDashoffset: 720, duration: 2, ease: 'none'}, '<')
+    .to('#vs1', {opacity: 0, duration: .6}, '+=.6')
+    .add(() => { vState.textContent = 'VERIFYING'; vState.style.color = '#EDEAFF'; arc.style.stroke = '#EDEAFF'; arc.style.filter = 'drop-shadow(0 0 14px #EDEAFF)'; }, '<')
+    .to('#vs2', {opacity: 1, duration: .8})
+    .to(arc, {strokeDashoffset: 300, duration: 2, ease: 'none'}, '<')
+    .to('#vs2', {opacity: 0, duration: .6}, '+=.6')
+    .add(() => { vState.textContent = 'RELEASED'; vState.style.color = '#FFC24B'; vAmt.textContent = '+$158.40'; vAmt.style.color = '#FFC24B'; arc.style.stroke = '#FFC24B'; arc.style.filter = 'drop-shadow(0 0 22px #FFC24B)'; goldRain(); }, '<')
+    .to('#vs3', {opacity: 1, duration: .8})
+    .to(arc, {strokeDashoffset: 0, duration: 2, ease: 'none'}, '<')
+    .to('#vaultBg', {scale: 1.35, opacity: .9, duration: 2}, '<')
+    .to({}, {duration: 1});
+
+  /* ============ SYSTEMS horizontal scroll ============ */
+  const track = document.getElementById('sysTrack');
+  const getX = () => -(track.scrollWidth - innerWidth + 80);
+  gsap.to(track, {x: getX, ease: 'none',
+    scrollTrigger: {trigger: '#systems', start: 'top top', end: () => '+=' + (track.scrollWidth - innerWidth + 400), pin: true, scrub: .5, invalidateOnRefresh: true}});
+} else {
+  /* graceful fallback: everything simply visible */
+  document.querySelectorAll('#vs1,#vs2,#vs3').forEach((el,i) => { if (i===2) el.style.opacity = 1; });
+  document.getElementById('vaultArc').style.strokeDashoffset = 0;
+}
+
+/* vault gold rain burst */
+function goldRain(){
+  const c = document.getElementById('vaultParticles');
+  if (reduced) return;
+  c.width = c.offsetWidth * devicePixelRatio; c.height = c.offsetHeight * devicePixelRatio;
+  const x = c.getContext('2d');
+  let ps = Array.from({length: 60}, () => ({
+    x: c.width/2, y: c.height/2,
+    vx: (Math.random()-.5)*16*devicePixelRatio, vy: (Math.random()-.85)*16*devicePixelRatio,
+    life: 1, r: Math.random()*3+1
+  }));
+  (function anim(){
+    x.clearRect(0,0,c.width,c.height);
+    ps.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += .2*devicePixelRatio; p.life -= .012;
+      x.globalAlpha = Math.max(0, p.life);
+      x.fillStyle = '#FFC24B'; x.shadowColor = '#FFC24B'; x.shadowBlur = 12;
+      x.beginPath(); x.arc(p.x, p.y, p.r*devicePixelRatio, 0, 7); x.fill();
+    });
+    ps = ps.filter(p => p.life > 0);
+    if (ps.length) requestAnimationFrame(anim); else x.clearRect(0,0,c.width,c.height);
+  })();
+}
+
+/* ============ tilt on dossier card ============ */
+(function(){
+  const card = document.getElementById('scoreCard');
+  if (matchMedia('(hover:none)').matches || reduced) return;
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const rx = ((e.clientY - r.top)/r.height - .5) * -10;
+    const ry = ((e.clientX - r.left)/r.width - .5) * 12;
+    card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+  });
+  card.addEventListener('mouseleave', () => card.style.transform = '');
+})();
+
+/* ============ mini constellation (interactive) ============ */
+const oc = document.getElementById('miniOrbit'), octx = oc.getContext('2d');
+const CREATORS = [
+  ['@ria.eats','Food','Hyderabad',92,6.4,42300,'$120 – $400',31],
+  ['@fit.arjun','Fitness','Mumbai',88,5.1,88000,'$300 – $900',54],
+  ['@meera.makes','DIY','Bengaluru',95,8.2,12800,'$50 – $150',22],
+  ['@style.by.sana','Fashion','Delhi',71,2.9,156000,'$340 – $1,000',40],
+  ['@pixel.pravah','Tech','Pune',84,4.4,64500,'$160 – $540',19],
+  ['@travel.tara','Travel','Goa',63,1.8,210000,'$770 – $2,750',12],
+  ['@chai.chronicles','Food','Hyderabad',90,7.7,9800,'$20 – $60',44],
+  ['@gym.rathore','Fitness','Jaipur',48,0.9,320000,'$800 – $2,800',3],
+  ['@design.dev','Tech','Remote',86,5.9,27600,'$160 – $540',28],
+  ['@hyd.foodwalks','Food','Hyderabad',93,9.1,18400,'$50 – $150',37],
+];
+let nodes = [], sel = 0;
+function sizeOrbit(){
+  oc.width = oc.offsetWidth * devicePixelRatio; oc.height = oc.offsetHeight * devicePixelRatio;
+  nodes = CREATORS.map((c,i) => {
+    const ang = (i / CREATORS.length) * Math.PI*2 + .6;
+    const rad = (0.2 + (i % 3) * 0.12) * Math.min(oc.width, oc.height);
+    return {c, ang, rad, spd:(0.0009 + (i%4)*0.0004) * (i%2?1:-1), r: Math.max(5, Math.log10(c[5])*3.2)*devicePixelRatio};
+  });
+}
+sizeOrbit(); addEventListener('resize', sizeOrbit);
+const tierColor = s => s >= 80 ? '#FFC24B' : s >= 55 ? '#7C5CFF' : '#FF5C7A';
+(function drawOrbit(){
+  octx.clearRect(0,0,oc.width,oc.height);
+  const cx = oc.width/2, cy = oc.height/2;
+  octx.strokeStyle = 'rgba(124,92,255,.12)';
+  for (const rr of [.2,.32,.44]){ octx.beginPath(); octx.arc(cx,cy,rr*Math.min(oc.width,oc.height),0,7); octx.stroke(); }
+  nodes.forEach((n,i) => {
+    if (!reduced) n.ang += n.spd;
+    n.x = cx + Math.cos(n.ang)*n.rad; n.y = cy + Math.sin(n.ang)*n.rad*.72;
+    const col = tierColor(n.c[3]), isSel = i === sel;
+    octx.shadowColor = col; octx.shadowBlur = (isSel?26:12)*devicePixelRatio;
+    octx.fillStyle = col; octx.globalAlpha = isSel ? 1 : .82;
+    octx.beginPath(); octx.arc(n.x,n.y,n.r*(isSel?1.4:1),0,7); octx.fill();
+    octx.shadowBlur = 0; octx.globalAlpha = 1;
+    if (isSel){ octx.strokeStyle = col; octx.lineWidth = devicePixelRatio;
+      octx.beginPath(); octx.arc(n.x,n.y,n.r*2.2,0,7); octx.stroke(); }
+  });
+  requestAnimationFrame(drawOrbit);
+})();
+oc.addEventListener('click', e => {
+  const rect = oc.getBoundingClientRect();
+  const mx = (e.clientX-rect.left)*devicePixelRatio, my = (e.clientY-rect.top)*devicePixelRatio;
+  let best = 0, bd = 1e9;
+  nodes.forEach((n,i) => { const d = (n.x-mx)**2 + (n.y-my)**2; if (d < bd){bd=d;best=i;} });
+  sel = best;
+  const c = CREATORS[sel];
+  document.getElementById('scHandle').textContent = `${c[0]} · ${c[1]} · ${c[2]}`;
+  const sc = document.getElementById('scScore');
+  sc.textContent = `${c[3]} / 100`; sc.className = 'v ' + (c[3]>=80?'gold':'');
+  document.getElementById('scEng').textContent = c[4] + '%';
+  document.getElementById('scFol').textContent = c[5].toLocaleString();
+  document.getElementById('scRate').textContent = c[6] + ' / post';
+  document.getElementById('scDeals').textContent = c[7] + (c[3]>=80 ? ' · zero disputes' : ' · under review');
+  if (hasGsap && !reduced) gsap.fromTo('#scoreCard', {scale:.97}, {scale:1, duration:.4, ease:'back.out(2)'});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# ---- databases: real user data, password hashes, never the repo ----
+*.db
+*.db-wal
+*.db-shm
+
+# ---- secrets ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*token*
+credentials*.json
+
+# ---- personal files that happen to live in this directory ----
+# The static server serves a literal allowlist, so these were never reachable
+# over HTTP — but they have no business in a public repo either.
+*.pdf
+PAKT-DOSSIER.md
+
+# ---- runtime ----
+node_modules/
+*.log
+nodedist/
+
+# ---- os / editor ----
+.DS_Store
+.vscode/
+.idea/

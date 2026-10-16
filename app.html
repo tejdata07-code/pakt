@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAKT — The Exchange</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Khand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=excon@300,400,500,700&f[]=amulya@400,500,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Treasury palette — matches index.html */
+    --void:#08060A; --nebula:#0D0A10; --panel:#15111A; --panel2:#1D1723; --panel3:#241C2E;
+    --violet:#C98A4B; --gold:#F0B843; --gold-hot:#FFE1A0;
+    --ink:#F2EBE0; --dim:#8A7E70; --coral:#B4553F; --mint:#8FD9A8;
+    --bone:#F2EBE0; --ash:#8A7E70; --tarnish:#6E7F6A;
+    --line:rgba(242,235,224,.11);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--void);color:var(--ink);font-family:'Excon',sans-serif;font-weight:300;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+  /* ===================== WELCOME GATE ===================== */
+  .welcome{position:fixed;inset:0;z-index:200;background:
+    radial-gradient(ellipse at 50% 78%,rgba(240,184,67,.1),transparent 60%),var(--void);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;
+    animation:wfade .5s ease}
+  .welcome.gone{opacity:0;pointer-events:none;transition:opacity .5s;visibility:hidden}
+  @keyframes wfade{from{opacity:0}}
+  .w-logo{position:absolute;top:26px;left:32px;font-family:'Khand',sans-serif;font-weight:700;font-size:1.6rem;color:var(--ink)}
+  .w-logo i{font-style:normal;color:var(--gold)}
+  .w-inner{max-width:720px;text-align:center;animation:wrise .55s cubic-bezier(.16,1,.3,1)}
+  @keyframes wrise{from{opacity:0;transform:translateY(24px)}}
+  .w-kicker{font-family:'Amulya',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+  .w-h{font-family:'Khand',sans-serif;font-weight:700;font-size:clamp(2.6rem,7vw,4.6rem);line-height:.92;letter-spacing:-.01em}
+  .w-h em{font-style:normal;color:var(--gold)}
+  .w-sub{margin-top:14px;font-size:1.02rem;color:var(--dim);line-height:1.5}
+  .w-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:38px}
+  .w-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:34px 28px;text-align:left;
+    display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:.25s;color:var(--ink)}
+  .w-card:hover{border-color:var(--gold);transform:translateY(-4px);background:var(--panel2)}
+  .w-card .w-ic{font-size:2.4rem;margin-bottom:6px}
+  .w-card b{font-family:'Khand',sans-serif;font-weight:700;font-size:1.7rem;line-height:1}
+  .w-card .w-desc{font-size:.94rem;color:var(--dim);line-height:1.5}
+  .w-card .w-go{font-family:'Amulya',sans-serif;font-weight:600;font-size:.86rem;color:var(--gold);margin-top:8px}
+  .w-skip{margin-top:26px;background:none;border:none;color:var(--dim);font-family:'Amulya',sans-serif;font-size:.9rem;cursor:pointer;transition:color .2s}
+  .w-skip:hover{color:var(--ink)}
+  .w-steps{display:flex;flex-direction:column;gap:14px;margin:32px auto 30px;max-width:460px;text-align:left}
+  .w-onbstep{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .w-onbstep .num{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#FFE1A0,#E0A233 62%,#9C7412);color:#231a05;font-family:'Khand',sans-serif;font-weight:700;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+  .w-onbstep b{font-family:'Khand',sans-serif;font-weight:600;font-size:1.15rem;display:block;line-height:1.1}
+  .w-onbstep span{font-size:.9rem;color:var(--dim);line-height:1.45}
+  .w-start{width:auto;padding:16px 34px !important}
+  @media(max-width:640px){.w-cards{grid-template-columns:1fr}}
+  ::selection{background:var(--gold);color:var(--void)}
+  .mono{font-family:'Amulya',sans-serif}
+  .display{font-family:'Khand',sans-serif}
+  button{font-family:inherit;cursor:pointer}
+  input,textarea,select{font-family:inherit;color:var(--ink)}
+
+  /* ---------- top bar ---------- */
+  .topbar{display:flex;align-items:center;gap:20px;padding:0 20px;height:58px;border-bottom:1px solid var(--line);background:rgba(21,16,41,.7);backdrop-filter:blur(10px);z-index:20}
+  .logo{font-family:'Khand',sans-serif;font-weight:700;font-size:1.05rem}
+  .logo b{color:var(--gold)}
+  .topticker{flex:1;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+  .topticker-track{display:flex;gap:44px;white-space:nowrap;animation:tk 30s linear infinite;width:max-content}
+  @keyframes tk{to{transform:translateX(-50%)}}
+  .tick{font-family:'Amulya',sans-serif;font-size:.72rem;color:var(--dim)}
+  .tick b{color:var(--gold);font-weight:400}
+  .roletoggle{display:flex;border:1px solid var(--line);border-radius:100px;overflow:hidden}
+  .roletoggle button{background:none;border:none;color:var(--dim);font-size:.78rem;padding:9px 18px;letter-spacing:.04em}
+  .roletoggle button.on{background:var(--gold);color:#231a05;font-weight:600}
+
+  /* ---------- layout ---------- */
+  .shell{flex:1;display:flex;min-height:0}
+  .rail{width:88px;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:22px 0;gap:8px;background:var(--nebula)}
+  .rail button{width:64px;background:none;border:none;color:var(--dim);display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 0;border-radius:14px;transition:.2s}
+  .rail button .ic{font-size:1.3rem}
+  .rail button span{font-family:'Amulya',sans-serif;font-size:.56rem;letter-spacing:.14em}
+  .rail button.on{color:var(--gold);background:rgba(255,194,75,.08)}
+  .rail button:hover{color:var(--ink)}
+  .stage{flex:1;position:relative;min-width:0;overflow:hidden}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column}
+  .screen.on{display:flex}
+
+  /* ---------- discover (creator grid) ---------- */
+  .discover{max-width:1200px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:var(--panel);color:var(--dim);border-radius:100px;padding:8px 17px;font-family:'Amulya',sans-serif;font-size:.8rem;transition:.18s}
+  .chip:hover{color:var(--ink);border-color:var(--ash)}
+  .chip.on{border-color:var(--gold);color:var(--void);background:var(--gold);font-weight:600}
+  .disc-controls{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin:18px 0 16px}
+  .disc-tools{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+  .budget-inline label{font-family:'Amulya',sans-serif;font-size:.72rem;color:var(--dim);display:block;margin-bottom:7px}
+  .budget-inline label b{color:var(--gold);font-weight:600}
+  .budget-inline input[type=range]{width:190px;accent-color:var(--gold)}
+  .seg-sort{display:flex;gap:3px;background:var(--panel);border-radius:10px;padding:3px;border:1px solid var(--line)}
+  .seg-sort button{font-family:'Amulya',sans-serif;font-size:.74rem;padding:8px 13px;border-radius:8px;color:var(--dim);transition:.15s}
+  .seg-sort button.on{background:var(--panel3);color:var(--bone)}
+  .disc-legend{display:flex;gap:20px;align-items:center;flex-wrap:wrap;font-family:'Amulya',sans-serif;font-size:.72rem;color:var(--dim);padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:18px}
+  .disc-legend .disc-count{margin-left:auto;color:var(--ash)}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}
+  .creator-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;padding-bottom:30px}
+  .cc{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;cursor:pointer;transition:.2s;overflow:hidden}
+  .cc:hover{border-color:var(--gold);transform:translateY(-3px);background:var(--panel2)}
+  .cc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tier)}
+  .cc.risk{opacity:.72}
+  .cc-top{display:flex;align-items:center;gap:13px;margin-bottom:16px}
+  .cc-coin{width:46px;height:46px;border-radius:50%;flex-shrink:0;background:radial-gradient(circle at 38% 32%,var(--tier-hi),var(--tier) 68%);display:flex;align-items:center;justify-content:center;font-family:'Khand',sans-serif;font-weight:700;font-size:1.15rem;color:var(--void);box-shadow:0 4px 16px var(--tier-sh)}
+  .cc-id{min-width:0;flex:1}
+  .cc-id b{font-weight:500;font-size:1rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cc-id span{font-family:'Amulya',sans-serif;font-size:.72rem;color:var(--dim)}
+  .cc-badge{font-family:'Amulya',sans-serif;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:100px;font-weight:600;flex-shrink:0}
+  .cc-stats{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:15px}
+  .cc-stat{background:var(--void);border-radius:10px;padding:10px 12px}
+  .cc-stat .n{font-family:'Khand',sans-serif;font-weight:700;font-size:1.35rem;line-height:1}
+  .cc-stat .l{font-family:'Amulya',sans-serif;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+  .cc-rate{display:flex;justify-content:space-between;align-items:center;font-family:'Amulya',sans-serif;font-size:.8rem;color:var(--dim);padding-top:14px;border-top:1px solid var(--line)}
+  .cc-rate b{font-family:'Khand',sans-serif;font-weight:600;font-size:1.05rem;color:var(--gold)}
+  .cc-flag{margin-top:12px;font-family:'Amulya',sans-serif;font-size:.72rem;color:#e2a6a0;display:flex;gap:7px;align-items:flex-start;line-height:1.4}
+  .cc-view{position:absolute;top:20px;right:20px;font-family:'Amulya',sans-serif;font-size:.72rem;color:var(--gold);opacity:0;transition:.2s}
+  .cc:hover .cc-view{opacity:1}
+
+  /* ---------- dossier panel ---------- */
+  .dossier{position:absolute;top:0;right:0;bottom:0;width:360px;max-width:92vw;background:rgba(27,21,53,.96);backdrop-filter:blur(16px);border-left:1px solid var(--line);transform:translateX(105%);transition:transform .35s cubic-bezier(.2,.9,.3,1);z-index:10;display:flex;flex-direction:column;padding:26px;overflow-y:auto}
+  .dossier.open{transform:none}
+  .dossier .close{position:absolute;top:16px;right:16px;background:none;border:1px solid var(--line);color:var(--dim);border-radius:50%;width:32px;height:32px}
+  .d-handle{font-size:1.2rem;font-weight:500;margin-top:6px}
+  .d-meta{color:var(--dim);font-size:.82rem;margin-top:2px}
+  .ringwrap{display:flex;justify-content:center;margin:26px 0 8px}
+  .scorering{position:relative;width:140px;height:140px}
+  .scorering svg{transform:rotate(-90deg)}
+  .scorering .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .scorering .num b{font-family:'Amulya',sans-serif;font-size:1.9rem;font-weight:400}
+  .scorering .num span{font-family:'Amulya',sans-serif;font-size:.56rem;letter-spacing:.24em;color:var(--dim)}
+  .d-rows{margin-top:14px}
+  .d-row{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);font-size:.86rem}
+  .d-row span:first-child{color:var(--dim)}
+  .d-row .mono{font-size:.8rem}
+  .flags{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+  .flag{font-size:.78rem;padding:9px 13px;border-radius:10px;background:rgba(255,92,122,.09);border:1px solid rgba(255,92,122,.35);color:#ffb3c2}
+  .flag.ok{background:rgba(92,230,184,.07);border-color:rgba(92,230,184,.3);color:var(--mint)}
+  .launchbtn{margin-top:auto;padding-top:22px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Khand',sans-serif;font-size:.78rem;font-weight:500;letter-spacing:.04em;padding:14px 24px;border-radius:100px;border:1px solid var(--line);background:none;color:var(--ink);transition:.25s;width:100%}
+  .btn:hover{border-color:var(--violet)}
+  .btn.gold{background:var(--gold);color:#231a05;border-color:var(--gold);box-shadow:0 0 26px rgba(255,194,75,.25)}
+  .btn.gold:hover{background:var(--gold-hot)}
+  .btn.ghost{width:auto;padding:10px 20px;font-size:.7rem}
+  .btn.coral{border-color:rgba(255,92,122,.5);color:var(--coral)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+
+  /* ---------- modal (launch deal) ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(11,8,23,.78);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:40}
+  .overlay.open{display:flex}
+  .modal{width:520px;max-width:94vw;max-height:92vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:34px}
+  .modal .k{font-family:'Amulya',sans-serif;font-size:.62rem;letter-spacing:.28em;color:var(--gold)}
+  .modal h3{font-family:'Khand',sans-serif;font-size:1.25rem;margin:10px 0 20px;text-transform:uppercase}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:.76rem;color:var(--dim);margin-bottom:7px;letter-spacing:.04em}
+  .field input,.field textarea{width:100%;background:var(--void);border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:.9rem;outline:none}
+  .field input:focus,.field textarea:focus{border-color:var(--violet)}
+  .field textarea{resize:vertical;min-height:84px}
+  .dtype{display:flex;gap:10px}
+  .dtype button{flex:1;background:var(--void);border:1px solid var(--line);border-radius:12px;padding:13px;color:var(--dim);font-size:.82rem}
+  .dtype button.on{border-color:var(--gold);color:var(--gold)}
+  .lockstage{text-align:center;padding:14px 0 8px}
+  .lockring{position:relative;width:170px;height:170px;margin:0 auto 18px}
+  .lockring svg{transform:rotate(-90deg)}
+  .lockring .inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .lockring .inner b{font-family:'Amulya',sans-serif;font-size:1.5rem;font-weight:400}
+  .lockring .inner span{font-family:'Amulya',sans-serif;font-size:.56rem;letter-spacing:.26em;color:var(--dim);margin-top:4px}
+  .locknotes{text-align:left;margin:18px 0;display:flex;flex-direction:column;gap:9px}
+  .ln{font-size:.8rem;color:var(--dim);opacity:.25;transition:.4s;display:flex;gap:9px}
+  .ln.lit{opacity:1;color:var(--ink)}
+  .ln .tickmark{color:var(--mint)}
+
+  /* ---------- vault ---------- */
+  .padwrap{padding:26px 30px;overflow-y:auto;flex:1}
+  .scr-head{margin-bottom:22px}
+  .scr-head h2{font-family:'Khand',sans-serif;font-size:1.15rem;text-transform:uppercase;letter-spacing:.05em}
+  .scr-head p{color:var(--dim);font-size:.84rem;margin-top:5px}
+  /* vault + signals summary strips */
+  .vault-summary,.sig-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .vsum{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;position:relative;overflow:hidden}
+  .vsum .lbl{font-family:'Amulya',sans-serif;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  .vsum .val{font-family:'Khand',sans-serif;font-weight:700;font-size:2rem;line-height:1.1;margin-top:6px}
+  .vsum .sub{font-family:'Amulya',sans-serif;font-size:.7rem;color:var(--dim);margin-top:2px}
+  .vsum.gold .val{color:var(--gold)} .vsum.mint .val{color:var(--mint)} .vsum.copper .val{color:var(--violet)} .vsum.coral .val{color:var(--coral)}
+  .vsum::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--line)}
+  .vsum.gold::after{background:var(--gold)} .vsum.mint::after{background:var(--mint)} .vsum.copper::after{background:var(--violet)} .vsum.coral::after{background:var(--coral)}
+  .vault-filterbar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .vf{font-family:'Amulya',sans-serif;font-size:.76rem;padding:8px 16px;border-radius:100px;border:1px solid var(--line);color:var(--dim);background:none;transition:.15s}
+  .vf:hover{color:var(--ink);border-color:var(--ink)}
+  .vf.on{background:var(--gold);color:var(--void);border-color:var(--gold);font-weight:600}
+  @media(max-width:900px){.vault-summary,.sig-summary{grid-template-columns:repeat(2,1fr)}}
+
+  .vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px}
+  .dealcard{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:22px;display:flex;gap:18px;transition:.25s;position:relative;overflow:hidden}
+  .dealcard:hover{border-color:var(--violet)}
+  .dc-ring{position:relative;width:86px;height:86px;flex-shrink:0}
+  .dc-ring svg{transform:rotate(-90deg)}
+  .dc-ring .st{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Amulya',sans-serif;font-size:.5rem;letter-spacing:.14em;text-align:center}
+  .dc-body{flex:1;min-width:0}
+  .dc-body h4{font-size:.95rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dc-body .who{font-size:.76rem;color:var(--dim);margin:3px 0 8px}
+  .dc-amt{font-family:'Amulya',sans-serif;font-size:.98rem;color:var(--gold)}
+  .dc-sub{font-family:'Amulya',sans-serif;font-size:.62rem;color:var(--dim);margin-top:4px;letter-spacing:.06em}
+  .dc-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .dc-actions .btn{width:auto;padding:8px 16px;font-size:.62rem}
+  .paidburst{position:absolute;inset:0;pointer-events:none}
+
+  /* ---------- signals ---------- */
+  .sig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
+  .sigcard{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:24px}
+  .sigcard h4{font-size:.95rem;font-weight:500}
+  .sigcard .who{font-size:.76rem;color:var(--dim);margin:3px 0 16px}
+  .roas{font-family:'Amulya',sans-serif;font-size:2.3rem;color:var(--gold)}
+  .roas-lbl{font-family:'Amulya',sans-serif;font-size:.6rem;letter-spacing:.24em;color:var(--dim)}
+  .bars{margin-top:16px;display:flex;flex-direction:column;gap:11px}
+  .bar{display:grid;grid-template-columns:88px 1fr 74px;align-items:center;gap:10px;font-size:.74rem;color:var(--dim)}
+  .bar .track{height:7px;border-radius:4px;background:var(--void);overflow:hidden}
+  .bar .fill{height:100%;border-radius:4px;background:var(--violet);width:0;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+  .bar .fill.gold{background:var(--gold)}
+  .bar .num{font-family:'Amulya',sans-serif;text-align:right;color:var(--ink);font-size:.72rem}
+  .sim{margin-top:16px}
+
+  /* ---------- creator: wallet ---------- */
+  .wallet-hero{border:1px solid rgba(255,194,75,.4);background:linear-gradient(150deg,rgba(255,194,75,.1),var(--panel));border-radius:24px;padding:30px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px}
+  .wallet-hero .tot{font-family:'Amulya',sans-serif;font-size:2.6rem;color:var(--gold)}
+  .wallet-hero .lbl{font-family:'Amulya',sans-serif;font-size:.62rem;letter-spacing:.26em;color:var(--dim)}
+  .speed{font-family:'Amulya',sans-serif;font-size:.72rem;color:var(--mint);border:1px solid rgba(92,230,184,.4);border-radius:100px;padding:9px 17px}
+  .feed{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+  .payrow{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:14px;padding:15px 20px;background:var(--panel)}
+  .payrow .l b{font-weight:500;font-size:.9rem}
+  .payrow .l span{display:block;font-size:.72rem;color:var(--dim);margin-top:2px}
+  .payrow .r{font-family:'Amulya',sans-serif;color:var(--gold)}
+  .payrow .r span{display:block;font-size:.6rem;color:var(--mint);text-align:right;margin-top:2px}
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
+  .panelbox{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:24px}
+  .panelbox h4{font-size:.95rem;font-weight:500;margin-bottom:6px}
+  .panelbox p.sub{font-size:.78rem;color:var(--dim);margin-bottom:14px}
+  .bench{font-family:'Amulya',sans-serif;font-size:1.5rem;color:var(--gold);margin:8px 0}
+  .comp-input{width:100%;background:var(--void);border:1px solid var(--line);border-radius:12px;padding:13px;font-size:.86rem;min-height:90px;resize:vertical;outline:none}
+  .comp-result{margin-top:12px;padding:13px 16px;border-radius:12px;font-size:.8rem;display:none}
+  .comp-result.ok{display:block;background:rgba(92,230,184,.08);border:1px solid rgba(92,230,184,.35);color:var(--mint)}
+  .comp-result.bad{display:block;background:rgba(255,92,122,.08);border:1px solid rgba(255,92,122,.35);color:#ffb3c2}
+
+  /* ---------- toast ---------- */
+  .toasts{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:10px;z-index:60}
+  .toast{background:var(--panel2);border:1px solid rgba(255,194,75,.5);border-radius:14px;padding:14px 20px;font-size:.84rem;box-shadow:0 8px 40px rgba(0,0,0,.5);animation:tin .3s ease;max-width:340px}
+  .toast b{color:var(--gold);font-weight:500}
+  @keyframes tin{from{opacity:0;transform:translateY(12px)}}
+  .empty{color:var(--dim);font-size:.86rem;border:1px dashed var(--line);border-radius:16px;padding:30px;text-align:center}
+
+  /* ---------- creator studio ---------- */
+  .insight-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:20px}
+  .insight{border:1px solid rgba(255,194,75,.4);border-radius:20px;padding:24px;background:linear-gradient(155deg,rgba(255,194,75,.08),var(--panel))}
+  .insight .stat{font-family:'Amulya',sans-serif;font-size:2.2rem;color:var(--gold)}
+  .insight p{font-size:.85rem;color:var(--dim);margin-top:8px}
+  .heatwrap{overflow-x:auto}
+  .heatmap{display:grid;grid-template-columns:52px repeat(6,1fr);gap:5px;min-width:480px}
+  .heatmap .hd{font-family:'Amulya',sans-serif;font-size:.58rem;color:var(--dim);display:flex;align-items:center;justify-content:center;letter-spacing:.1em}
+  .cell{aspect-ratio:2.2/1;border-radius:7px;background:var(--void);position:relative;cursor:pointer;transition:transform .15s}
+  .cell:hover{transform:scale(1.12);z-index:2}
+  .cell.gold{outline:1.5px solid var(--gold);box-shadow:0 0 14px rgba(255,194,75,.5)}
+  .autopsy{border:1px solid var(--line);border-radius:16px;padding:18px 20px;background:var(--panel);margin-bottom:12px}
+  .autopsy .top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px}
+  .autopsy .top b{font-weight:500;font-size:.92rem}
+  .autopsy .top .mono{font-size:.68rem;color:var(--gold)}
+  .whychips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+  .whychip{font-size:.72rem;color:var(--mint);background:rgba(92,230,184,.07);border:1px solid rgba(92,230,184,.28);border-radius:100px;padding:5px 12px}
+  .gauge{position:relative;width:150px;height:150px;margin:0 auto}
+  .gauge svg{transform:rotate(-90deg)}
+  .gauge .gnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .gauge .gnum b{font-family:'Amulya',sans-serif;font-size:2rem;font-weight:400}
+  .gauge .gnum span{font-family:'Amulya',sans-serif;font-size:.55rem;letter-spacing:.2em;color:var(--dim);margin-top:3px;text-align:center}
+  .checkrow{display:flex;gap:10px;font-size:.8rem;padding:9px 0;border-bottom:1px solid var(--line);color:var(--dim)}
+  .checkrow:last-child{border:none}
+  .checkrow .m{flex-shrink:0}
+  .checkrow.good{color:var(--ink)} .checkrow.good .m{color:var(--mint)}
+  .checkrow.bad .m{color:var(--coral)}
+  .ideacard{border:1px solid var(--line);border-radius:16px;padding:18px 20px;background:var(--panel);margin-bottom:12px;transition:.2s;position:relative}
+  .ideacard:hover{border-color:var(--gold);background:var(--panel2)}
+  .ideacard .ic-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+  .ideacard b{font-weight:500;font-size:1rem;display:block;line-height:1.3}
+  .ideacard .why{font-size:.78rem;color:var(--dim);margin-top:7px;display:flex;align-items:center;gap:7px}
+  .ideacard .why .sig{color:var(--mint)}
+  .ideacard .ic-tags{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap;align-items:center}
+  .ic-tag{font-family:'Amulya',sans-serif;font-size:.66rem;padding:5px 11px;border-radius:100px;border:1px solid var(--line);color:var(--dim)}
+  .ic-tag.effort{color:var(--mint);border-color:rgba(143,217,168,.35)}
+  .ideacard .mk{margin-left:auto;font-family:'Amulya',sans-serif;font-size:.74rem;color:var(--gold);border:1px solid rgba(240,184,67,.4);border-radius:100px;padding:7px 14px;transition:.15s}
+  .ideacard .mk:hover{background:var(--gold);color:var(--void)}
+  .fmt{font-family:'Amulya',sans-serif;font-size:.6rem;letter-spacing:.14em;color:var(--violet);border:1px solid rgba(201,138,75,.4);border-radius:100px;padding:6px 13px;white-space:nowrap;text-transform:uppercase;flex-shrink:0}
+
+  /* ideas layout */
+  .ideas-layout{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start}
+  .ideas-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .col-title{font-family:'Khand',sans-serif;font-weight:600;font-size:1.15rem}
+  .ideas-side{display:flex;flex-direction:column;gap:16px}
+  .side-card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:20px}
+  .side-sub{font-size:.78rem;color:var(--dim);margin:4px 0 14px;line-height:1.5}
+  .ptime{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);font-size:.86rem}
+  .ptime:last-child{border-bottom:none}
+  .ptime .day{color:var(--dim)}
+  .ptime .slot{font-family:'Amulya',sans-serif;color:var(--gold);font-size:.82rem}
+  .ptime .bestbadge{font-family:'Amulya',sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mint);border:1px solid rgba(143,217,168,.35);border-radius:100px;padding:3px 8px;margin-left:8px}
+  .wp{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .wp:last-child{border-bottom:none}
+  .wp .wd{font-family:'Amulya',sans-serif;font-size:.66rem;color:var(--dim);width:32px;flex-shrink:0}
+  .wp .wf{font-family:'Amulya',sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:100px;flex-shrink:0}
+  .wp .wt{font-size:.82rem;color:var(--ink)}
+  .streak{display:flex;align-items:center;gap:16px;background:linear-gradient(150deg,rgba(240,184,67,.1),var(--panel));border-color:rgba(240,184,67,.35)}
+  .streak-num{font-family:'Khand',sans-serif;font-weight:700;font-size:2.6rem;color:var(--gold);line-height:1}
+  .streak b{display:block;font-weight:500;font-size:.9rem}
+  .streak span{font-size:.74rem;color:var(--dim);line-height:1.4;display:block;margin-top:3px}
+  @media(max-width:980px){.ideas-layout{grid-template-columns:1fr}}
+
+  /* kit layout */
+  .kit-layout{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
+  .kit-side{display:flex;flex-direction:column;gap:16px}
+  .kit-cta-row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .topc{display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .topc:last-child{border-bottom:none}
+  .topc .tcimg{width:46px;height:46px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+  .topc .tcmeta{flex:1;min-width:0}
+  .topc .tcmeta b{font-weight:500;font-size:.86rem;display:block}
+  .topc .tcmeta span{font-family:'Amulya',sans-serif;font-size:.7rem;color:var(--dim)}
+  .topc .tcnum{font-family:'Khand',sans-serif;font-weight:700;font-size:1.1rem;color:var(--gold)}
+  .abreak{margin-top:4px}
+  .abrow{margin-bottom:12px}
+  .abrow .abtop{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:6px}
+  .abrow .abtop span:last-child{color:var(--gold);font-family:'Amulya',sans-serif}
+  .abtrack{height:7px;background:var(--void);border-radius:4px;overflow:hidden}
+  .abfill{height:100%;background:linear-gradient(90deg,var(--copper),var(--gold));border-radius:4px;transition:width .8s cubic-bezier(.16,1,.3,1)}
+  .brand-logos{display:flex;flex-wrap:wrap;gap:8px}
+  .blogo{font-family:'Khand',sans-serif;font-weight:600;font-size:.82rem;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 14px;background:var(--void)}
+  @media(max-width:980px){.kit-layout{grid-template-columns:1fr}}
+
+  .kitcard{border:1px solid rgba(255,194,75,.45);border-radius:24px;background:linear-gradient(160deg,rgba(255,194,75,.09),var(--panel));padding:30px;max-width:560px}
+  .kitcard .kh{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  .kitcard .kh b{font-family:'Khand',sans-serif;font-size:1.25rem;font-weight:700}
+  .vbadge{font-family:'Amulya',sans-serif;font-size:.6rem;letter-spacing:.16em;color:#231a05;background:var(--gold);border-radius:100px;padding:7px 14px}
+  .kitstats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}
+  .kstat{border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center;background:rgba(11,8,23,.4)}
+  .kstat b{font-family:'Amulya',sans-serif;font-size:1.15rem;color:var(--gold);font-weight:400;display:block}
+  .kstat span{font-family:'Amulya',sans-serif;font-size:.54rem;letter-spacing:.14em;color:var(--dim)}
+  .diag{border-left:3px solid var(--coral);border-radius:0 12px 12px 0;background:var(--panel);padding:14px 18px;margin-bottom:10px}
+  .diag.med{border-color:var(--gold)} .diag.low{border-color:var(--mint)}
+  .diag b{font-size:.88rem;font-weight:500}
+  .diag p{font-size:.78rem;color:var(--dim);margin-top:4px}
+  .minifield{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .minifield label{font-size:.68rem;color:var(--dim);display:block;margin-bottom:5px}
+  .minifield input{width:100%;background:var(--void);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.85rem;outline:none}
+
+  @media (max-width:760px){
+    .rail{width:64px}
+    .rail button{width:52px}
+    .rail button span{display:none}
+    .topticker{display:none}
+    .twocol{grid-template-columns:1fr}
+    .dossier{width:100vw;max-width:100vw}
+  }
+
+  /* ---------- cinematic layer ---------- */
+  .grain{position:fixed;inset:-100%;z-index:80;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 8s steps(10) infinite}
+  @keyframes grain{0%,100%{transform:translate(0,0)}10%{transform:translate(-5%,-8%)}30%{transform:translate(4%,6%)}50%{transform:translate(-7%,3%)}70%{transform:translate(6%,-4%)}90%{transform:translate(-3%,7%)}}
+  .cursor,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:99;border-radius:50%;will-change:transform}
+  .cursor{width:7px;height:7px;background:var(--gold);margin:-3.5px 0 0 -3.5px}
+  .cursor-ring{width:34px;height:34px;border:1px solid rgba(255,194,75,.5);margin:-17px 0 0 -17px;transition:width .25s,height .25s,margin .25s,background .25s}
+  .cursor-ring.big{width:64px;height:64px;margin:-32px 0 0 -32px;background:rgba(255,194,75,.07)}
+  @media (hover:none){.cursor,.cursor-ring{display:none}}
+  .screen.on{animation:scrIn .5s cubic-bezier(.2,.8,.2,1)}
+  @keyframes scrIn{from{opacity:0;transform:translateY(14px) scale(.995)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){.grain{display:none}.screen.on{animation:none}}
+</style>
+<style id="authcss">
+.authgate{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(11,10,24,.94);backdrop-filter:blur(6px)}
+.authgate[hidden]{display:none}
+.authbox{width:min(380px,90vw);padding:32px;border:1px solid rgba(240,184,67,.22);border-radius:16px;background:#141127;box-shadow:0 24px 70px rgba(0,0,0,.6)}
+.authbrand{font-family:Khand,system-ui,sans-serif;font-size:34px;font-weight:700;letter-spacing:.5px;color:#F0B843;margin-bottom:6px}
+.authbrand span{color:#6C63FF}
+.authlede{font-size:13px;line-height:1.55;color:#9A93B8;margin:0 0 20px}
+.authin{width:100%;box-sizing:border-box;margin-bottom:10px;padding:11px 13px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:#0E0C1D;color:#EFEAFF;font-size:14px;font-family:inherit}
+.authin[hidden]{display:none}
+.authin:focus{outline:none;border-color:rgba(240,184,67,.5)}
+.authbtn{width:100%;margin-top:6px;justify-content:center}
+.authlink{width:100%;margin-top:12px;background:none;border:none;color:#9A93B8;font-size:12.5px;font-family:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.authlink:hover{color:#F0B843}
+.autherr{margin-bottom:12px;padding:10px 12px;border:1px solid rgba(180,85,63,.45);border-radius:8px;background:rgba(180,85,63,.12);color:#D08B78;font-size:12.5px;line-height:1.5}
+.autherr[hidden]{display:none}
+.authroles{display:flex;gap:8px;margin-bottom:12px}
+.authroles[hidden]{display:none}
+.authrole{flex:1;padding:9px 8px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:#0E0C1D;color:#9A93B8;font-size:12.5px;font-family:inherit;cursor:pointer}
+.authrole.on{border-color:rgba(240,184,67,.55);background:rgba(240,184,67,.12);color:#F0B843}
+.authrow{display:flex;gap:8px}
+.authrow .authin{flex:1;min-width:0;padding-left:9px;padding-right:6px;font-size:13px}
+#authCreatorFields[hidden]{display:none}
+select.authin{appearance:none;cursor:pointer}
+.authhint{margin:2px 0 4px;font-size:11.5px;line-height:1.45;color:#6F688C}
+.cc.unclaimed{opacity:.92}
+.cc-prospect{margin-top:10px;padding:7px 10px;border:1px dashed rgba(154,147,184,.4);border-radius:7px;color:#9A93B8;font-size:11.5px;line-height:1.45}
+</style>
+</head>
+<body>
+
+<!-- ===================== WELCOME GATE ===================== -->
+<div class="welcome" id="welcome">
+  <a class="w-logo" href="index.html">PAK<i>T</i></a>
+  <div class="w-inner" id="wStep1">
+    <p class="w-kicker">Welcome — let's get you to the right place</p>
+    <h1 class="w-h">Who are <em>you?</em></h1>
+    <p class="w-sub">Pick one. You can switch anytime from the top of the screen.</p>
+    <div class="w-cards">
+      <button class="w-card" data-pick="creator">
+        <span class="w-ic">🎬</span>
+        <b>I make content</b>
+        <span class="w-desc">Get paid the second your post goes live. Free tools to help you grow.</span>
+        <span class="w-go">This is me →</span>
+      </button>
+      <button class="w-card" data-pick="brand">
+        <span class="w-ic">🏷️</span>
+        <b>I'm a brand</b>
+        <span class="w-desc">Find real creators, agree a price, and only pay when the post is verified.</span>
+        <span class="w-go">This is me →</span>
+      </button>
+    </div>
+    <button class="w-skip" id="wSkip">Just let me look around →</button>
+  </div>
+
+  <div class="w-inner" id="wStep2" style="display:none">
+    <p class="w-kicker" id="wOnbKicker">You're all set</p>
+    <h1 class="w-h" id="wOnbH">Here's the plan.</h1>
+    <div class="w-steps" id="wOnbSteps"></div>
+    <button class="btn gold w-start" id="wStart">Take me in →</button>
+  </div>
+</div>
+
+<div class="grain"></div>
+<div class="cursor"></div><div class="cursor-ring"></div>
+
+<div class="topbar">
+  <a class="logo" href="index.html">PA<b>KT</b></a>
+  <div class="topticker"><div class="topticker-track" id="topticker"></div></div>
+  <div class="roletoggle">
+    <button id="roleBrand" class="on">Brand</button>
+    <button id="roleCreator">Creator</button>
+  </div>
+</div>
+
+<div class="shell">
+  <div class="rail" id="rail">
+    <button data-scr="orbit" class="on brandnav"><span class="ic">⬡</span><span>DISCOVER</span></button>
+    <button data-scr="table" class="brandnav"><span class="ic">⇄</span><span>TABLE</span></button>
+    <button data-scr="vault" class="brandnav"><span class="ic">◎</span><span>VAULT</span></button>
+    <button data-scr="signals" class="brandnav"><span class="ic">▲</span><span>SIGNALS</span></button>
+    <button data-scr="wallet" class="creatornav" style="display:none"><span class="ic">⬡</span><span>WALLET</span></button>
+    <button data-scr="table" class="creatornav" style="display:none"><span class="ic">⇄</span><span>TABLE</span></button>
+    <button data-scr="pulse" class="creatornav" style="display:none"><span class="ic">✧</span><span>PULSE</span></button>
+    <button data-scr="lab" class="creatornav" style="display:none"><span class="ic">⌁</span><span>LAB</span></button>
+    <button data-scr="ideas" class="creatornav" style="display:none"><span class="ic">✺</span><span>IDEAS</span></button>
+    <button data-scr="kit" class="creatornav" style="display:none"><span class="ic">◈</span><span>KIT</span></button>
+    <button class="creatornav" style="display:none" onclick="location.href='forge.html'"><span class="ic">⚒</span><span>FORGE</span></button>
+  </div>
+
+  <div class="stage">
+    <!-- ============ DISCOVER (was Orbit) ============ -->
+    <div class="screen on" id="scr-orbit">
+      <div class="padwrap discover">
+        <div class="scr-head">
+          <h2>Find your creators</h2>
+          <p>Every creator below is scored for how real their audience is. Bright gold means verified and organic; tarnished means the numbers don't add up. Filter, then click any card to see the full picture.</p>
+        </div>
+
+        <div class="disc-controls">
+          <div class="chips" id="chips"></div>
+          <div class="disc-tools">
+            <div class="budget-inline">
+              <label>Max budget / post <b id="budgetVal">$3,000</b></label>
+              <input type="range" id="budgetRange" min="50" max="3000" value="3000" step="50">
+            </div>
+            <div class="seg-sort" id="sortSeg">
+              <button class="on" data-s="score">Most trusted</button>
+              <button data-s="followers">Biggest</button>
+              <button data-s="eng">Best engagement</button>
+              <button data-s="rate">Cheapest</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="disc-legend">
+          <span><span class="dot" style="background:var(--gold)"></span>Verified · 80+</span>
+          <span><span class="dot" style="background:var(--violet)"></span>Worth a look · 55–79</span>
+          <span><span class="dot" style="background:var(--coral)"></span>High risk · under 55</span>
+          <span class="disc-count" id="discCount"></span>
+        </div>
+
+        <div class="creator-grid" id="creatorGrid"></div>
+      </div>
+      <div class="dossier" id="dossier">
+        <button class="close" onclick="closeDossier()">✕</button>
+        <p class="k mono" style="font-size:.6rem;letter-spacing:.28em;color:var(--gold)">CREATOR DOSSIER</p>
+        <div class="d-handle" id="dHandle">@handle</div>
+        <div class="d-meta" id="dMeta">niche · city</div>
+        <div class="ringwrap">
+          <div class="scorering">
+            <svg width="140" height="140">
+              <circle cx="70" cy="70" r="60" fill="none" stroke="var(--void)" stroke-width="9"/>
+              <circle id="dRing" cx="70" cy="70" r="60" fill="none" stroke="var(--gold)" stroke-width="9" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377" style="transition:stroke-dashoffset .8s ease, stroke .4s"/>
+            </svg>
+            <div class="num"><b id="dScore">0</b><span>AUTHENTICITY</span></div>
+          </div>
+        </div>
+        <div class="d-rows">
+          <div class="d-row"><span>Audience</span><span class="mono" id="dFol">—</span></div>
+          <div class="d-row"><span>True engagement</span><span class="mono" id="dEng">—</span></div>
+          <div class="d-row"><span>Fair rate benchmark</span><span class="mono" id="dRate" style="color:var(--gold)">—</span></div>
+          <div class="d-row"><span>Deal history</span><span class="mono" id="dHist">—</span></div>
+        </div>
+        <div class="flags" id="dFlags"></div>
+        <div class="launchbtn"><button class="btn gold" id="launchBtn">Launch a deal →</button></div>
+      </div>
+    </div>
+
+    <!-- ============ VAULT ============ -->
+    <div class="screen" id="scr-vault">
+      <div class="padwrap">
+        <div class="scr-head">
+          <h2>The Vault</h2>
+          <p>Escrowed deals. Money exits only two doors: to the creator (content live + compliant) or back to you (published dispute rules). 72h of your silence pays the creator automatically.</p>
+        </div>
+        <div class="vault-summary" id="vaultSummary"></div>
+        <div class="vault-filterbar" id="vaultFilter">
+          <button class="vf on" data-f="all">All deals</button>
+          <button class="vf" data-f="FUNDED">Waiting</button>
+          <button class="vf" data-f="CONTENT_SUBMITTED">Live now</button>
+          <button class="vf" data-f="PAID">Paid</button>
+          <button class="vf" data-f="DISPUTED">Disputed</button>
+        </div>
+        <div class="vault-grid" id="vaultGrid"></div>
+      </div>
+    </div>
+
+    <!-- ============ SIGNALS ============ -->
+    <div class="screen" id="scr-signals">
+      <div class="padwrap">
+        <div class="scr-head">
+          <h2>Signals — what your money did</h2>
+          <p>Every funded deal ships with a tracking link. This is the return on it — clicks, conversions and revenue, attributed to each creator.</p>
+        </div>
+        <div class="sig-summary" id="sigSummary"></div>
+        <div class="sig-grid" id="sigGrid"></div>
+      </div>
+    </div>
+
+    <!-- ============ THE TABLE (both roles) ============ -->
+    <div class="screen" id="scr-table">
+      <div class="padwrap">
+        <div class="scr-head">
+          <h2>The Table — Every Offer On Record</h2>
+          <p>All haggling happens here, on an immutable ledger. The accepted number auto-locks as the escrow amount — nobody can quote a different price later, including us.</p>
+        </div>
+        <div style="max-width:680px">
+          <div class="panelbox" style="margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+              <div><b style="font-weight:500">Diwali launch reel</b><div style="font-size:.74rem;color:var(--dim);margin-top:2px">Kova Coffee ⇄ @demo.creator · opened 2h ago</div></div>
+              <span class="fmt" id="negStatus" style="border-color:rgba(255,194,75,.5);color:var(--gold)">OPEN</span>
+            </div>
+          </div>
+          <div id="offerLedger"></div>
+          <div class="panelbox" id="negActions" style="margin-top:4px">
+            <h4 id="turnNote">Your move</h4>
+            <p class="sub">Counter with a number, or accept the standing offer. Every action is timestamped on the ledger.</p>
+            <div class="minifield" style="grid-template-columns:1fr 2fr">
+              <div><label>Counter (USD)</label><input id="counterAmt" type="number" min="5" placeholder="280"></div>
+              <div><label>Note (optional)</label><input id="counterNote" placeholder="Launch-week slots are premium."></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn ghost" onclick="negCounter()">↩ Counter</button>
+              <button class="btn ghost gold" onclick="negAccept()">✓ Accept standing offer</button>
+              <button class="btn ghost coral" onclick="negDecline()">Decline</button>
+            </div>
+          </div>
+          <div class="panelbox" id="agreementCard" style="display:none;margin-top:16px;border-color:rgba(255,194,75,.5);background:linear-gradient(155deg,rgba(255,194,75,.09),var(--panel))">
+            <h4 style="color:var(--gold)">◈ Agreement sealed</h4>
+            <div class="d-rows" style="margin-top:8px">
+              <div class="d-row"><span>Final price</span><span class="mono" style="color:var(--gold)" id="agAmt">—</span></div>
+              <div class="d-row"><span>Accepted by</span><span class="mono" id="agBy">—</span></div>
+              <div class="d-row"><span>Terms fingerprint</span><span class="mono" style="font-size:.62rem" id="agHash">—</span></div>
+            </div>
+            <p style="font-size:.74rem;color:var(--dim);margin-top:12px">This SHA-256 fingerprint locks the exact terms both sides accepted. If anyone later claims a different price or brief, the hash proves otherwise. Recognized as an electronic record under the IT Act, 2000.</p>
+            <button class="btn gold" style="margin-top:14px;width:auto" id="fundAgreed" onclick="fundFromAgreement()">⚡ Fund escrow at agreed price →</button>
+          </div>
+          <div class="panelbox" style="margin-top:16px">
+            <h4>Deal chat</h4>
+            <p class="sub">Talk scope, dates, revisions — right here. Contact details get auto-hidden: deals that leave PAKT leave their protection behind.</p>
+            <div id="negChat" style="margin-bottom:10px"></div>
+            <div style="display:flex;gap:8px">
+              <input class="txt" id="chatInput" placeholder="Try typing a phone number…" style="margin:0;flex:1;background:var(--void);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.82rem;outline:none">
+              <button class="btn ghost gold" onclick="negChat()">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ CREATOR: WALLET ============ -->
+    <div class="screen" id="scr-wallet">
+      <div class="padwrap">
+        <div class="scr-head">
+          <h2>Wallet</h2>
+          <p>Payouts fire the instant a deal verifies. You never chase an invoice on PAKT.</p>
+        </div>
+        <div class="wallet-hero">
+          <div>
+            <div class="lbl">TOTAL EARNED</div>
+            <div class="tot" id="wTotal">$0.00</div>
+          </div>
+          <div class="speed">⚡ AVG PAYOUT SPEED: 0.8s</div>
+        </div>
+        <div class="feed" id="payFeed"></div>
+      </div>
+    </div>
+
+    <!-- ============ CREATOR: PULSE ============ -->
+    <div class="screen" id="scr-pulse">
+      <div class="padwrap">
+        <div class="scr-head">
+          <h2>Pulse — Your Audience, Decoded</h2>
+          <p>Learned from 90 days of your post history. You never post blind again. <span class="mono" style="font-size:.65rem;color:var(--violet)">(demo data — connects to your Instagram via Meta's official API in production)</span></p>
+        </div>
+        <div class="insight-row" id="pulseInsights"></div>
+        <div class="twocol">
+          <div class="panelbox">
+            <h4>Your golden windows</h4>
+            <p class="sub">First-hour engagement decides distribution. Post inside the bright cells. <span id="goldenNote" style="color:var(--gold)"></span></p>
+            <div class="heatwrap"><div class="heatmap" id="heatmap"></div></div>
+          </div>
+          <div class="panelbox">
+            <h4>Post autopsies — why your top posts worked</h4>
+            <p class="sub">Every post analyzed against your own history, not generic advice.</p>
+            <div id="autopsies"></div>
+          </div>
+        </div>
+        <div class="panelbox" style="margin-top:18px">
+          <h4>Reach Doctor</h4>
+          <p class="sub">Reach suddenly dropped? Enter your numbers, get a diagnosis.</p>
+          <div class="minifield">
+            <div><label>Avg views — 3 months ago</label><input id="rdBefore" type="number" value="10000"></div>
+            <div><label>Avg views — now</label><input id="rdNow" type="number" value="4000"></div>
+            <div><label>Posts per week</label><input id="rdPosts" type="number" value="1"></div>
+            <div><label>% of posts that are reels</label><input id="rdReels" type="number" value="20"></div>
+          </div>
+          <button class="btn ghost gold" onclick="runReachDoctor()">Diagnose my reach</button>
+          <div id="rdOut" style="margin-top:16px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ CREATOR: LAB ============ -->
+    <div class="screen" id="scr-lab">
+      <div class="padwrap">
+        <div class="scr-head">
+          <h2>The Lab — Test Before You Post</h2>
+          <p>The first 3 seconds and the caption decide your reach. Score both before the algorithm does.</p>
+        </div>
+        <div class="twocol">
+          <div class="panelbox">
+            <h4>Hook Lab</h4>
+            <p class="sub">Paste your opening line / first 3 seconds of speech.</p>
+            <textarea class="comp-input" id="hookInput" placeholder="Why do 3 out of 4 cafes fail in their first year?"></textarea>
+            <button class="btn ghost gold" style="margin-top:12px" onclick="runHook()">Score my hook</button>
+            <div id="hookOut" style="margin-top:18px;display:none">
+              <div class="gauge">
+                <svg width="150" height="150">
+                  <circle cx="75" cy="75" r="64" fill="none" stroke="var(--void)" stroke-width="9"/>
+                  <circle id="hookArc" cx="75" cy="75" r="64" fill="none" stroke="var(--gold)" stroke-width="9" stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402" style="transition:stroke-dashoffset .9s ease,stroke .4s"/>
+                </svg>
+                <div class="gnum"><b id="hookScore">0</b><span id="hookVerdict">—</span></div>
+              </div>
+              <div id="hookNotes" style="margin-top:14px"></div>
+              <h4 style="margin-top:16px;font-size:.85rem">Try these rewrites</h4>
+              <div id="hookRewrites"></div>
+            </div>
+          </div>
+          <div class="panelbox">
+            <h4>Caption Pre-flight</h4>
+            <p class="sub">Keyword SEO + hashtag audit + save-CTA + disclosure — one scan, before you post.</p>
+            <textarea class="comp-input" id="capInput" placeholder="Full recipe for this street food breakfast — save this for your next cafe run! #hyderabadfood #streetfood"></textarea>
+            <button class="btn ghost gold" style="margin-top:12px" onclick="runCaption()">Run pre-flight</button>
+            <div id="capOut" style="margin-top:16px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ CREATOR: IDEAS ============ -->
+    <div class="screen" id="scr-ideas">
+      <div class="padwrap">
+        <div class="scr-head">
+          <h2>Ideas — never post from empty</h2>
+          <p>Fresh ideas for your niche, each built around what the algorithm rewards right now — saves, shares and watch time. Plan your week, then open one straight into the editor.</p>
+        </div>
+
+        <div class="ideas-layout">
+          <div class="ideas-main">
+            <div class="ideas-bar">
+              <h4 class="col-title">Today's five ideas</h4>
+              <button class="btn ghost" style="width:auto" onclick="renderIdeas(true)">↻ Give me 5 more</button>
+            </div>
+            <div id="ideaList"></div>
+          </div>
+
+          <div class="ideas-side">
+            <div class="side-card">
+              <h4 class="col-title">Best times to post this week</h4>
+              <div id="postTimes"></div>
+            </div>
+            <div class="side-card">
+              <h4 class="col-title">Your 7-day plan</h4>
+              <p class="side-sub">A balanced week — mix formats so you don't burn out or bore your audience.</p>
+              <div id="weekPlan"></div>
+            </div>
+            <div class="side-card streak">
+              <div class="streak-num" id="streakNum">6</div>
+              <div><b>day posting streak</b><span>Keep it going — consistency is the single biggest reach signal.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ CREATOR: KIT ============ -->
+    <div class="screen" id="scr-kit">
+      <div class="padwrap">
+        <div class="scr-head">
+          <h2>Media kit — pitch like a pro</h2>
+          <p>This is exactly what a brand sees when you share your kit. Every number is verified from your completed PAKT deals — the one thing a self-made kit can never claim.</p>
+        </div>
+
+        <div class="kit-layout">
+          <div class="kitcard">
+            <div class="kh">
+              <b>@demo.creator</b>
+              <span class="vbadge">✓ PAKT VERIFIED</span>
+            </div>
+            <p style="font-size:.82rem;color:var(--dim);margin-top:6px">Food · Hyderabad · English + Telugu</p>
+            <div class="kitstats">
+              <div class="kstat"><b>42.3K</b><span>AUDIENCE</span></div>
+              <div class="kstat"><b>6.4%</b><span>TRUE ENGAGEMENT</span></div>
+              <div class="kstat"><b>92/100</b><span>AUTHENTICITY</span></div>
+              <div class="kstat"><b id="kitDeals">31</b><span>DEALS DONE</span></div>
+              <div class="kstat"><b>0</b><span>DISPUTES LOST</span></div>
+              <div class="kstat"><b>$120–400</b><span>RATE / POST</span></div>
+            </div>
+            <p style="font-size:.78rem;color:var(--dim)">Engagement and deal history verified from completed PAKT escrow deals — not self-reported.</p>
+            <div class="kit-cta-row">
+              <button class="btn gold" style="width:auto" onclick="toast('<b>Share link copied.</b> Any brand can view your live verified kit — no login needed.')">Copy share link</button>
+              <button class="btn ghost" style="width:auto" onclick="toast('<b>Kit exported</b> as a PDF one-pager.')">Download PDF</button>
+            </div>
+          </div>
+
+          <div class="kit-side">
+            <div class="side-card">
+              <h4 class="col-title">Your best work</h4>
+              <p class="side-sub">The posts brands will want to see — your top performers.</p>
+              <div id="topContent"></div>
+            </div>
+            <div class="side-card">
+              <h4 class="col-title">Who follows you</h4>
+              <div id="audienceBreak"></div>
+            </div>
+            <div class="side-card">
+              <h4 class="col-title">Brands you've worked with</h4>
+              <div class="brand-logos" id="brandLogos"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ LAUNCH DEAL MODAL ============ -->
+<div class="overlay" id="dealOverlay">
+  <div class="modal">
+    <!-- step 1 -->
+    <div id="mStep1">
+      <p class="k">STEP 01 / 03 — THE BRIEF</p>
+      <h3>Launch a deal</h3>
+      <div class="field"><label>Deal with</label><input id="fWho" disabled></div>
+      <div class="field"><label>Title</label><input id="fTitle" placeholder="Reel: summer cold brew launch"></div>
+      <div class="field"><label>Brief — what exactly do you want?</label><textarea id="fBrief" placeholder="One 30s reel featuring the product, tag @yourbrand, morning slot preferred."></textarea></div>
+      <div class="field"><label>Amount (USD)</label><input id="fAmt" type="number" min="5" placeholder="180"></div>
+      <div class="field"><label>Type</label>
+        <div class="dtype">
+          <button id="tOne" class="on" onclick="setType('one_off')">One-off post</button>
+          <button id="tRet" onclick="setType('retainer')">Monthly retainer</button>
+        </div>
+      </div>
+      <button class="btn gold" onclick="lockFunds()">Lock funds in escrow →</button>
+    </div>
+    <!-- step 2 -->
+    <div id="mStep2" style="display:none">
+      <p class="k">STEP 02 / 03 — LOCKING</p>
+      <h3>Sealing the vault</h3>
+      <div class="lockstage">
+        <div class="lockring">
+          <svg width="170" height="170">
+            <circle cx="85" cy="85" r="72" fill="none" stroke="var(--void)" stroke-width="10"/>
+            <circle id="lockArc" cx="85" cy="85" r="72" fill="none" stroke="var(--gold)" stroke-width="10" stroke-linecap="round" stroke-dasharray="452" stroke-dashoffset="452" style="transition:stroke-dashoffset 2.2s cubic-bezier(.3,.7,.3,1)"/>
+          </svg>
+          <div class="inner"><b id="lockAmt">$180.00</b><span id="lockState">CHARGING</span></div>
+        </div>
+        <div class="locknotes">
+          <div class="ln" id="ln1"><span class="tickmark">✓</span> Funds captured and locked in escrow</div>
+          <div class="ln" id="ln2"><span class="tickmark">✓</span> Tracking link generated for ROI attribution</div>
+          <div class="ln" id="ln3"><span class="tickmark">✓</span> 72-hour auto-release armed — you can't ghost, they can't stall</div>
+        </div>
+      </div>
+    </div>
+    <!-- step 3 -->
+    <div id="mStep3" style="display:none;text-align:center">
+      <p class="k">STEP 03 / 03 — LIVE</p>
+      <h3 style="color:var(--gold)">Deal is live</h3>
+      <p style="color:var(--dim);font-size:.9rem;margin-bottom:10px">The creator has been notified. The money is already waiting for them — it just needs their content to go live.</p>
+      <p class="mono" style="font-size:.72rem;color:var(--violet);margin-bottom:24px" id="trackUrl">pakt.app/t/xxxxxx</p>
+      <button class="btn gold" onclick="finishDeal()">View in the Vault</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<!-- ============ auth gate ============
+     The app used to render a hardcoded CREATORS array and never call the
+     server. Real creator data lives behind auth, so there has to be a way
+     in. -->
+<div id="authGate" class="authgate" hidden>
+  <div class="authbox">
+    <div class="authbrand">PA<span>KT</span></div>
+    <p class="authlede">Sign in to see the creator directory. Every profile is loaded from the API — nothing on this screen is invented.</p>
+    <div class="autherr" id="authErr" hidden></div>
+    <div class="authroles" id="authRoles" hidden>
+      <button class="authrole on" data-role="brand">I'm a brand</button>
+      <button class="authrole" data-role="creator">I make content</button>
+    </div>
+    <input class="authin" id="authEmail" type="email" placeholder="you@example.com" autocomplete="email">
+    <input class="authin" id="authPass" type="password" placeholder="password (8+ characters)" autocomplete="current-password">
+    <input class="authin" id="authName" type="text" placeholder="your name" autocomplete="name" hidden>
+    <!-- Creator signup needs these: auth.js REQUIRED_FOR_CREATOR rejects an
+         account without them, because brands search and price on these numbers. -->
+    <div id="authCreatorFields" hidden>
+      <input class="authin" id="authHandle" type="text" placeholder="instagram handle, e.g. @yourname">
+      <select class="authin" id="authNiche"></select>
+      <div class="authrow">
+        <input class="authin" id="authFollowers" type="number" min="0" placeholder="followers">
+        <input class="authin" id="authLikes" type="number" min="0" placeholder="likes">
+        <input class="authin" id="authComments" type="number" min="0" placeholder="comments">
+      </div>
+      <p class="authhint">Copy these from Instagram Insights. They set your rate band and authenticity score.</p>
+    </div>
+    <button class="btn gold authbtn" id="authGo">Sign in</button>
+    <button class="authlink" id="authToggle">No account? Create one</button>
+  </div>
+</div>
+
+<script>
+/* =================== data — loaded from the API, never hardcoded ===================
+   This block used to be a literal array of 16 invented creators (@demo.creator,
+   @meera.makes …) with invented authenticity scores and deal histories. None
+   of those handles exist on Instagram, and the app never made a single
+   network call — it rendered the constant and called it a directory.
+   Everything below now comes from the server. If the directory is empty, the
+   screen says so rather than filling itself in. */
+let CREATORS = [];
+let deals = [];
+let payouts = [];
+let ME = null;
+
+/* ---- API ---- */
+const TOKEN_KEY = 'pakt.token';
+let TOKEN = null;
+try { TOKEN = localStorage.getItem(TOKEN_KEY); } catch { TOKEN = null; }
+
+/* fetch() REJECTS on a network failure — it does not resolve with ok:false.
+   Without this catch the rejection propagated out of every caller, so a dropped
+   connection did not show an error: it killed the function mid-way and the
+   button simply stopped doing anything. Silent dead controls are the worst
+   possible failure on a flaky mobile connection, which is most of this market.
+   A network failure is now an ordinary {ok:false} with a message, so every
+   existing `if (!r.ok)` branch handles it without changing. */
+async function api(method, path, body){
+  const headers = { 'Content-Type': 'application/json' };
+  if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN;
+  let res;
+  try {
+    res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  } catch (e) {
+    return { status: 0, ok: false, offline: true,
+      json: { error: 'network', message: 'Could not reach PAKT. Check your connection and try again.' } };
+  }
+  let json = null;
+  try { json = await res.json(); } catch {}
+  if (res.status === 429) {
+    const secs = json && json.retry_after_seconds;
+    json = json || {};
+    json.message = json.message || `Too many requests — wait ${secs || 60}s and try again.`;
+  }
+  return { status: res.status, ok: res.ok, json };
+}
+
+/* ---- shape mapping ----
+   The API speaks minor units, lowercase niches and a nested authenticity
+   object; this screen wants dollars, capitalised chips and flat fields.
+   Convert in exactly one place so the two can never drift apart again. */
+const NICHE_LABEL = { diy: 'DIY' }; // acronyms the generic capitaliser gets wrong
+const titleCase = (n) => !n ? '—' : (NICHE_LABEL[n] || n.charAt(0).toUpperCase() + n.slice(1));
+const centsToUnits = (c) => (typeof c === 'number' ? Math.round(c / 100) : null);
+
+function fromMember(c){
+  const a = c.authenticity || {};
+  const b = c.benchmark || {};
+  return {
+    id: c.id,
+    handle: '@' + String(c.handle || '').replace(/^@+/, ''),
+    niche: titleCase(c.niche),
+    city: c.city || '—',
+    followers: c.followers || 0,
+    eng: typeof a.engagement_rate === 'number' ? a.engagement_rate : null,
+    score: typeof a.score === 'number' ? a.score : null,
+    tier: a.tier || 'unverified',
+    rate: [centsToUnits(b.low_cents), centsToUnits(b.high_cents)],
+    deals: a.deals_completed || 0,
+    verification: a.verification || 'self_reported',
+    flags: Array.isArray(a.flags) ? a.flags : [],
+    notes: Array.isArray(a.notes) ? a.notes : [],
+    prospect: false,
+  };
+}
+
+/* A prospect is a real Instagram account imported via Business Discovery who
+   has not signed up. It carries no authenticity score on purpose — the score
+   needs growth and account age, which Business Discovery does not return. */
+function fromProspect(c){
+  const b = c.benchmark || {};
+  return {
+    id: 'p:' + c.handle,
+    handle: '@' + c.handle,
+    niche: titleCase(c.niche),
+    city: '—',
+    followers: c.followers || 0,
+    eng: typeof c.engagement_rate === 'number' ? c.engagement_rate : null,
+    score: null,
+    tier: 'unscored',
+    rate: [centsToUnits(b.low_cents), centsToUnits(b.high_cents)],
+    deals: 0,
+    verification: 'imported',
+    flags: [],
+    notes: [],
+    prospect: true,
+    statsFromPosts: c.stats_from_posts || 0,
+    provenance: c.provenance || null,
+  };
+}
+
+async function loadCreators(){
+  const [members, discovered] = await Promise.all([
+    api('GET', '/api/creators'),
+    api('GET', '/api/creators/discover?min_followers=0&limit=200'),
+  ]);
+  if (members.status === 401 || discovered.status === 401) { signOut(); return; }
+  const a = Array.isArray(members.json) ? members.json.map(fromMember) : [];
+  const claimed = new Set(a.map(c => c.handle.toLowerCase()));
+  const b = (discovered.json && Array.isArray(discovered.json.creators) ? discovered.json.creators : [])
+    .map(fromProspect)
+    .filter(c => !claimed.has(c.handle.toLowerCase())); // a claimed prospect is already a member
+  CREATORS = a.concat(b);
+}
+
+async function loadDeals(){
+  const r = await api('GET', '/api/deals');
+  if (r.status === 401) { signOut(); return; }
+  const rows = (r.json && Array.isArray(r.json.deals)) ? r.json.deals : (Array.isArray(r.json) ? r.json : []);
+  deals = rows.map(d => ({
+    id: d.id,
+    creator: '@' + String(d.creator_handle || d.creator || '').replace(/^@+/, ''),
+    title: d.title,
+    amt: centsToUnits(d.amount_cents),
+    state: d.state,
+    compliance: d.compliance_ok === 1 || d.compliance_ok === true,
+  }));
+}
+
+async function loadWallet(){
+  const r = await api('GET', '/api/wallet');
+  if (!r.ok || !r.json) { payouts = []; return; }
+  const rows = Array.isArray(r.json.payouts) ? r.json.payouts : [];
+  payouts = rows.map(x => ({ t: x.title || x.deal_id || 'Payout', amt: (x.net_cents ?? x.amount_cents ?? 0) / 100, when: '' }));
+}
+
+/* ---- auth gate ---- */
+const gateEl = () => document.getElementById('authGate');
+let authMode = 'login';
+let authRole = 'brand';
+
+/* The signup form hardcoded role:'brand', so a creator literally could not
+   make an account through this screen — login worked for both, signup did
+   not. The role is picked here and the creator-only stat fields appear with
+   it. */
+function setAuthRole(r){
+  authRole = r;
+  document.querySelectorAll('.authrole').forEach(b => b.classList.toggle('on', b.dataset.role === r));
+  document.getElementById('authCreatorFields').hidden = (r !== 'creator' || authMode !== 'signup');
+  document.getElementById('authName').placeholder = r === 'creator' ? 'your name' : 'brand name';
+  authError(null);
+}
+
+/* The niche list is the server's, not a copy — taxonomy.js is the one canonical
+   vocabulary and hardcoding it here is how a client drifts out of sync with it.
+   But when this call failed the select was rendered EMPTY and still submittable,
+   so signup sent niche:"" and came back with a server error about a field the
+   form never actually offered. Now a failure is visible and retryable. */
+async function fillNicheSelect(){
+  const sel = document.getElementById('authNiche');
+  if (!sel || sel.dataset.filled === '1') return;
+  sel.innerHTML = '<option value="">Loading niches…</option>';
+  const r = await api('GET', '/api/meta');            // public route, no token needed
+  const list = (r.json && Array.isArray(r.json.niches)) ? r.json.niches : [];
+  if (!list.length) {
+    sel.innerHTML = '<option value="">Could not load niches — tap to retry</option>';
+    sel.dataset.filled = '0';
+    authError(r.offline
+      ? 'Could not reach PAKT to load the niche list. Check your connection, then tap the niche box to retry.'
+      : 'Could not load the niche list. Tap the niche box to retry.');
+    return;
+  }
+  sel.innerHTML = '<option value="" disabled selected>Pick your niche…</option>'
+    + list.map(n => `<option value="${n}">${titleCase(n)}</option>`).join('');
+  sel.dataset.filled = '1';
+}
+
+// tapping the select after a failed load retries it, rather than stranding the user
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('authNiche');
+  if (sel) sel.addEventListener('mousedown', () => { if (sel.dataset.filled !== '1') fillNicheSelect(); });
+});
+
+function signOut(){
+  TOKEN = null; ME = null;
+  try { localStorage.removeItem(TOKEN_KEY); } catch {}
+  CREATORS = []; deals = []; payouts = [];
+  gateEl().hidden = false;
+}
+
+function authError(msg){
+  const e = document.getElementById('authErr');
+  if (!msg) { e.hidden = true; return; }
+  e.textContent = msg; e.hidden = false;
+}
+
+async function boot(){
+  if (!TOKEN) { gateEl().hidden = false; return; }
+  const me = await api('GET', '/api/me');
+  if (!me.ok) { signOut(); return; }
+  ME = me.json.user;
+  gateEl().hidden = true;
+  await Promise.all([loadCreators(), loadDeals(), loadWallet()]);
+  await loadNiches();
+  startTicker();
+  setRole(ME.role === 'creator' ? 'creator' : 'brand');
+}
+
+/* The button had no busy state, so a slow or failed request looked identical to
+   a dead control — which is exactly what a user reports as "it's stuck". */
+let authBusy = false;
+async function doAuth(){
+  if (authBusy) return;
+  authError(null);
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPass').value;
+  const name = document.getElementById('authName').value.trim();
+  if (!email || !password) { authError('Email and password are both required.'); return; }
+  let body;
+  if (authMode === 'login') {
+    body = { email, password };
+  } else {
+    body = { role: authRole, name: name || email.split('@')[0], email, password };
+    /* Creator signup carries audience stats. They are sent as numbers, not
+       strings — util.js V.int rejects "42000" outright rather than coercing. */
+    if (authRole === 'creator') {
+      const num = (id) => { const v = document.getElementById(id).value.trim(); return v === '' ? null : Number(v); };
+      const handle = document.getElementById('authHandle').value.trim().replace(/^@+/, '');
+      const followers = num('authFollowers'), avg_likes = num('authLikes'), avg_comments = num('authComments');
+      if (!handle) { authError('Your Instagram handle is required.'); return; }
+      if (followers === null || avg_likes === null || avg_comments === null) {
+        authError('Followers, average likes and average comments are all required — brands price on these numbers.'); return;
+      }
+      if (![followers, avg_likes, avg_comments].every(n => Number.isInteger(n) && n >= 0)) {
+        authError('Followers, likes and comments must be whole numbers.'); return;
+      }
+      const niche = document.getElementById('authNiche').value;
+      if (!niche) { authError('Pick your niche — brands filter by it, and it sets your rate band.'); return; }
+      Object.assign(body, { handle, niche, followers, avg_likes, avg_comments });
+    }
+  }
+  const btn = document.getElementById('authGo');
+  const label = btn ? btn.textContent : '';
+  authBusy = true;
+  if (btn) { btn.disabled = true; btn.textContent = authMode === 'login' ? 'Signing in…' : 'Creating account…'; }
+  try {
+    const r = await api('POST', authMode === 'login' ? '/api/login' : '/api/signup', body);
+    if (!r.ok) {
+      authError((r.json && r.json.message)
+        || (authMode === 'login' ? `Sign-in failed (${r.status}).` : `Could not create the account (${r.status}).`));
+      return;
+    }
+    TOKEN = r.json.token;
+    try { localStorage.setItem(TOKEN_KEY, TOKEN); } catch {}
+    await boot();
+  } catch (e) {
+    // boot() reaches a lot of endpoints; none of them should be able to strand
+    // the user on a frozen form with no explanation.
+    authError('Something went wrong finishing sign-in. Please try again.');
+    console.error(e);
+  } finally {
+    authBusy = false;
+    if (btn) { btn.disabled = false; btn.textContent = label; }
+  }
+}
+
+const FEE = .12;
+
+/* =================== toasts =================== */
+function toast(html){
+  const t = document.createElement('div');
+  t.className = 'toast'; t.innerHTML = html;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 4200);
+}
+
+/* =================== top ticker =================== */
+/* This used to invent a payout — Math.random()*260 — against each hardcoded
+   handle, so the strip read as a live settlement feed while being pure
+   decoration. It now shows real completed payouts, and shows nothing at all
+   when there are none. An empty ledger is not a reason to fabricate one. */
+function startTicker(){
+  const el = document.getElementById('topticker');
+  if (!payouts.length) { el.innerHTML = ''; el.closest('.topticker').style.display = 'none'; return; }
+  el.closest('.topticker').style.display = '';
+  const items = payouts.slice(0, 8).map(p =>
+    `<span class="tick">${p.t} <b>+$${p.amt.toFixed(2)}</b></span>`);
+  el.innerHTML = items.join('') + items.join('');
+}
+
+/* =================== role + nav =================== */
+const screens = ['orbit','vault','signals','wallet','pulse','lab','ideas','kit','table'];
+function show(scr){
+  screens.forEach(s => document.getElementById('scr-'+s).classList.toggle('on', s===scr));
+  document.querySelectorAll('.rail button').forEach(b => b.classList.toggle('on', b.dataset.scr===scr));
+  if (scr==='orbit') renderDiscover();
+  if (scr==='vault') renderVault();
+  if (scr==='signals') renderSignals();
+  if (scr==='wallet') renderWallet();
+  if (scr==='pulse') renderPulse();
+  if (scr==='ideas') renderIdeas();
+  if (scr==='kit') renderKit();
+  if (scr==='table') renderTable();
+}
+document.querySelectorAll('.rail button').forEach(b => b.addEventListener('click', () => show(b.dataset.scr)));
+document.getElementById('roleBrand').addEventListener('click', () => setRole('brand'));
+document.getElementById('roleCreator').addEventListener('click', () => setRole('creator'));
+function setRole(r){
+  document.getElementById('roleBrand').classList.toggle('on', r==='brand');
+  document.getElementById('roleCreator').classList.toggle('on', r==='creator');
+  document.querySelectorAll('.brandnav').forEach(b => b.style.display = r==='brand' ? '' : 'none');
+  document.querySelectorAll('.creatornav').forEach(b => b.style.display = r==='creator' ? '' : 'none');
+  show(r==='brand' ? 'orbit' : 'wallet');
+}
+
+/* =================== DISCOVER (creator grid) =================== */
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let selId = null, nicheFilter = 'All', maxBudget = 3000, sortKey = 'score';
+/* The chip list was hardcoded to 7 niches while taxonomy.js defines 10 —
+   beauty, gaming and finance creators could be imported but never filtered
+   to. It comes from /api/meta now, so the two cannot drift. */
+let NICHES = ['All'];
+async function loadNiches(){
+  const r = await api('GET', '/api/meta');
+  const list = (r.json && Array.isArray(r.json.niches)) ? r.json.niches : [];
+  NICHES = ['All'].concat(list.map(titleCase));
+  renderChips();
+}
+function renderChips(){
+  document.getElementById('chips').innerHTML = NICHES.map(n => `<button class="chip ${n===nicheFilter?'on':''}" data-n="${n}">${n}</button>`).join('');
+  document.querySelectorAll('#chips .chip').forEach(ch => ch.addEventListener('click', () => {
+    nicheFilter = ch.dataset.n;
+    document.querySelectorAll('#chips .chip').forEach(c => c.classList.toggle('on', c===ch));
+    renderDiscover();
+  }));
+}
+renderChips();
+document.getElementById('budgetRange').addEventListener('input', e => {
+  maxBudget = +e.target.value;
+  document.getElementById('budgetVal').textContent = '$' + maxBudget.toLocaleString();
+  renderDiscover();
+});
+document.querySelectorAll('#sortSeg button').forEach(b => b.addEventListener('click', () => {
+  sortKey = b.dataset.s;
+  document.querySelectorAll('#sortSeg button').forEach(x => x.classList.toggle('on', x===b));
+  renderDiscover();
+}));
+function tierColor(s){ return s===null ? '#6C63FF' : s>=80 ? '#F0B843' : s>=55 ? '#C98A4B' : '#B4553F'; }
+/* A null score is not a bad score. Imported creators and members who have not
+   filled in their stats have no score at all, and the old ternary chain read
+   null as "under 55" and painted them high risk — the exact failure
+   services.js calls out: missing data shown as a risk signal. */
+function tierMeta(s){
+  if(s===null) return {col:'#6C63FF',hi:'#A9A2FF',sh:'rgba(108,99,255,.28)',badge:'Not scored',bcol:'rgba(108,99,255,.16)',btext:'#A9A2FF',cls:'unclaimed'};
+  if(s>=80) return {col:'#F0B843',hi:'#FFE1A0',sh:'rgba(240,184,67,.35)',badge:'Verified',bcol:'rgba(240,184,67,.16)',btext:'#F0B843',cls:''};
+  if(s>=55) return {col:'#C98A4B',hi:'#E4B37E',sh:'rgba(201,138,75,.3)',badge:'Worth a look',bcol:'rgba(201,138,75,.16)',btext:'#C98A4B',cls:''};
+  return {col:'#B4553F',hi:'#D08B78',sh:'rgba(180,85,63,.3)',badge:'High risk',bcol:'rgba(180,85,63,.16)',btext:'#B4553F',cls:'risk'};
+}
+// a creator with no follower count has no benchmark, so no lower bound to filter on
+function visible(c){ return (nicheFilter==='All' || c.niche===nicheFilter) && (c.rate[0] === null || c.rate[0] <= maxBudget); }
+function fmtK(n){ return n>=1000 ? (n/1000).toFixed(n>=100000?0:1)+'K' : n; }
+function renderDiscover(){
+  const grid = document.getElementById('creatorGrid');
+  let list = CREATORS.filter(visible);
+  // nulls sort last in every order — an unscored creator is not a zero-scored one
+  const nl = (v) => (v === null || v === undefined);
+  const desc = (k) => (a,b) => nl(a[k]) - nl(b[k]) || (b[k]||0) - (a[k]||0);
+  const sorters = {
+    score: desc('score'),
+    followers: desc('followers'),
+    eng: desc('eng'),
+    rate: (a,b) => nl(a.rate[0]) - nl(b.rate[0]) || (a.rate[0]||0) - (b.rate[0]||0),
+  };
+  list.sort(sorters[sortKey]);
+  document.getElementById('discCount').textContent = `${list.length} creator${list.length===1?'':'s'} shown`;
+  if(!list.length){
+    grid.innerHTML = CREATORS.length
+      ? `<div class="empty" style="grid-column:1/-1">No creators match those filters. Try raising the budget or picking a different niche.</div>`
+      : `<div class="empty" style="grid-column:1/-1">The directory is empty — no creators have signed up and none have been imported yet.<br><br>
+           Import real Instagram accounts with:<br>
+           <code style="display:inline-block;margin-top:8px;padding:8px 10px;border-radius:6px;background:rgba(0,0,0,.35);font-size:12px">node tools/import-creators.js --handles=one,two</code></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(c => {
+    const t = tierMeta(c.score);
+    const initials = c.handle.replace('@','').slice(0,2).toUpperCase();
+    const style = `--tier:${t.col};--tier-hi:${t.hi};--tier-sh:${t.sh}`;
+    return `<div class="cc ${t.cls}" style="${style}" data-id="${c.id}">
+      <span class="cc-view">View →</span>
+      <div class="cc-top">
+        <div class="cc-coin">${initials}</div>
+        <div class="cc-id"><b>${c.handle}</b><span>${c.niche} · ${c.city}</span></div>
+      </div>
+      <span class="cc-badge" style="background:${t.bcol};color:${t.btext}">${t.badge}${c.score===null?'':' · '+c.score}</span>
+      <div class="cc-stats" style="margin-top:14px">
+        <div class="cc-stat"><div class="n">${fmtK(c.followers)}</div><div class="l">Audience</div></div>
+        <div class="cc-stat"><div class="n">${c.eng===null?'—':c.eng+'%'}</div><div class="l">${c.prospect?'Engagement':'Real engagement'}</div></div>
+      </div>
+      <div class="cc-rate"><span>Fair rate / post</span><b>${c.rate[0]===null?'—':'$'+c.rate[0]+'–'+c.rate[1]}</b></div>
+      ${c.prospect ? `<div class="cc-prospect">Imported from Instagram · not on PAKT yet${c.statsFromPosts?` · engagement from ${c.statsFromPosts} post${c.statsFromPosts===1?'':'s'}`:''}</div>` : ''}
+      ${c.flags.length ? `<div class="cc-flag">⚠ ${c.flags[0]}</div>` : ''}
+    </div>`;
+  }).join('');
+  grid.querySelectorAll('.cc').forEach(card => card.addEventListener('click', () => {
+    const c = CREATORS.find(x => x.id === card.dataset.id);
+    if(c) openDossier(c);
+  }));
+}
+let currentCreator = null;
+function openDossier(c){
+  currentCreator = c; selId = c.id;
+  document.getElementById('dHandle').textContent = c.handle;
+  document.getElementById('dMeta').textContent = `${c.niche} · ${c.city}`;
+  document.getElementById('dFol').textContent = c.followers ? c.followers.toLocaleString() : '—';
+  document.getElementById('dEng').textContent = c.eng === null ? '—' : c.eng + '%';
+  document.getElementById('dRate').textContent = c.rate[0] === null ? '—' : `$${c.rate[0]} – $${c.rate[1]} / post`;
+  /* was: `${c.deals} · ${c.disputes} disputes` off invented counts. The API
+     reports completed deals and whether the numbers are platform-verified or
+     self-reported, which is the thing a brand actually needs to weigh. */
+  document.getElementById('dHist').textContent = c.prospect
+    ? 'Not on PAKT — no deal history'
+    : `${c.deals} · ${c.verification === 'platform_verified' ? 'platform-verified' : 'self-reported'}`;
+  document.getElementById('dScore').textContent = c.score === null ? '—' : c.score;
+  const ring = document.getElementById('dRing');
+  ring.style.stroke = tierColor(c.score);
+  ring.style.strokeDashoffset = c.score === null ? 377 : 377 - (377 * c.score / 100);
+  /* "No fraud signals" is a claim, and it was previously made about anyone
+     with an empty flags array — including creators who had never been scored
+     at all. Absence of a check is not a clean check. */
+  const fl = document.getElementById('dFlags');
+  fl.innerHTML = c.flags.length
+    ? c.flags.map(f => `<div class="flag">⚠ ${f}</div>`).join('')
+    : c.score === null
+      ? `<div class="flag">Not scored yet.${c.prospect ? ' Imported from public Instagram data — growth and account age are not available, so no authenticity check has run.' : ' This creator has not filed audience stats.'}</div>`
+      : `<div class="flag ok">✓ No fraud signals — engagement patterns look organic</div>`;
+  const lb = document.getElementById('launchBtn');
+  lb.disabled = c.prospect || c.score === null || c.score < 55;
+  lb.textContent = c.prospect ? 'Not on PAKT — invite them'
+    : c.score === null ? 'Not scored — no rate to price against'
+    : c.score < 55 ? 'Blocked — high fraud risk'
+    : 'Launch a deal →';
+  document.getElementById('dossier').classList.add('open');
+}
+function closeDossier(){ document.getElementById('dossier').classList.remove('open'); selId = null; }
+
+/* =================== LAUNCH DEAL FLOW =================== */
+let dealType = 'one_off';
+function setType(t){
+  dealType = t;
+  document.getElementById('tOne').classList.toggle('on', t==='one_off');
+  document.getElementById('tRet').classList.toggle('on', t==='retainer');
+}
+document.getElementById('launchBtn').addEventListener('click', () => {
+  if (!currentCreator) return;
+  document.getElementById('fWho').value = `${currentCreator.handle} · ${currentCreator.niche}`;
+  document.getElementById('fAmt').value = currentCreator.rate[0];
+  ['mStep1','mStep2','mStep3'].forEach((s,i) => document.getElementById(s).style.display = i===0?'':'none');
+  document.getElementById('dealOverlay').classList.add('open');
+});
+function lockFunds(){
+  const title = document.getElementById('fTitle').value.trim() || 'Untitled deal';
+  const amt = Math.max(5, +document.getElementById('fAmt').value || 0);
+  document.getElementById('mStep1').style.display = 'none';
+  document.getElementById('mStep2').style.display = '';
+  document.getElementById('lockAmt').textContent = '$' + amt.toFixed(2);
+  const arc = document.getElementById('lockArc');
+  arc.style.strokeDashoffset = 452;
+  requestAnimationFrame(() => requestAnimationFrame(() => arc.style.strokeDashoffset = 0));
+  [['ln1',700],['ln2',1400],['ln3',2100]].forEach(([id,t]) => setTimeout(() => document.getElementById(id).classList.add('lit'), t));
+  setTimeout(() => {
+    document.getElementById('lockState').textContent = 'LOCKED';
+    const code = 't' + Math.random().toString(36).slice(2,8);
+    document.getElementById('trackUrl').textContent = 'pakt.app/t/' + code;
+    deals.unshift({id:'d'+Date.now(), creator: currentCreator.handle, title, amt, state:'FUNDED', type: dealType});
+    setTimeout(() => {
+      document.getElementById('mStep2').style.display = 'none';
+      document.getElementById('mStep3').style.display = '';
+    }, 700);
+  }, 2400);
+}
+function finishDeal(){
+  document.getElementById('dealOverlay').classList.remove('open');
+  ['ln1','ln2','ln3'].forEach(id => document.getElementById(id).classList.remove('lit'));
+  closeDossier();
+  show('vault');
+  toast(`<b>Deal live.</b> Funds locked in escrow — the creator has been notified.`);
+}
+
+/* =================== VAULT =================== */
+const STATE_META = {
+  FUNDED:            {col:'#C98A4B', pct:.33, lbl:'FUNDED·WAITING'},
+  CONTENT_SUBMITTED: {col:'#F2EBE0', pct:.66, lbl:'CONTENT LIVE'},
+  DISPUTED:          {col:'#B4553F', pct:.66, lbl:'DISPUTED'},
+  PAID:              {col:'#F0B843', pct:1,   lbl:'PAID'},
+  REFUNDED:          {col:'#9B93C4', pct:1,   lbl:'REFUNDED'},
+};
+function ringSvg(state){
+  const m = STATE_META[state];
+  const C = 2*Math.PI*36;
+  return `<svg width="86" height="86">
+    <circle cx="43" cy="43" r="36" fill="none" stroke="var(--void)" stroke-width="7"/>
+    <circle cx="43" cy="43" r="36" fill="none" stroke="${m.col}" stroke-width="7" stroke-linecap="round"
+      stroke-dasharray="${C}" stroke-dashoffset="${C*(1-m.pct)}" style="filter:drop-shadow(0 0 8px ${m.col})"/>
+  </svg>`;
+}
+let vaultFilter='all';
+function vaultTotals(){
+  const t={escrow:0,inflight:0,released:0,disputes:0,count:deals.length};
+  deals.forEach(d=>{
+    if(d.state==='FUNDED'||d.state==='CONTENT_SUBMITTED'){t.escrow+=d.amt;t.inflight++;}
+    if(d.state==='PAID')t.released+=d.amt*(1-FEE);
+    if(d.state==='DISPUTED')t.disputes++;
+  });
+  return t;
+}
+function renderVaultSummary(){
+  const el=document.getElementById('vaultSummary'); if(!el)return;
+  const t=vaultTotals();
+  el.innerHTML=`
+    <div class="vsum gold"><div class="lbl">Locked in escrow</div><div class="val">$${t.escrow.toFixed(0)}</div><div class="sub">${t.inflight} deal${t.inflight===1?'':'s'} in flight</div></div>
+    <div class="vsum mint"><div class="lbl">Released to creators</div><div class="val">$${t.released.toFixed(0)}</div><div class="sub">after 12% fee</div></div>
+    <div class="vsum copper"><div class="lbl">Active deals</div><div class="val">${t.count}</div><div class="sub">across all creators</div></div>
+    <div class="vsum coral"><div class="lbl">Open disputes</div><div class="val">${t.disputes}</div><div class="sub">${t.disputes?'rules deciding':'all clear'}</div></div>`;
+}
+function renderVault(){
+  renderVaultSummary();
+  const g = document.getElementById('vaultGrid');
+  const list = vaultFilter==='all' ? deals : deals.filter(d=>d.state===vaultFilter);
+  if (!list.length){ g.innerHTML = `<div class="empty">${vaultFilter==='all'?'No deals yet. Head to Discover and pick a creator to launch your first one.':'No deals in this stage right now.'}</div>`; return; }
+  g.innerHTML = list.map(d => {
+    const m = STATE_META[d.state];
+    let actions = '', sub = '';
+    if (d.state==='FUNDED'){
+      sub = 'Escrow locked · waiting on creator';
+      actions = `<button class="btn ghost" onclick="simPost('${d.id}')">▶ simulate: creator posts</button>
+                 <button class="btn ghost coral" onclick="cancelDeal('${d.id}')">Cancel & refund</button>`;
+    } else if (d.state==='CONTENT_SUBMITTED'){
+      sub = `✓ compliance passed · auto-release in ${d.hoursLeft || 72}h`;
+      actions = `<button class="btn ghost gold" onclick="verifyDeal('${d.id}')">⚡ Verify → pay instantly</button>
+                 <button class="btn ghost coral" onclick="disputeDeal('${d.id}')">Dispute</button>`;
+    } else if (d.state==='PAID'){
+      sub = 'Creator paid · 0.8s after verification';
+    } else if (d.state==='DISPUTED'){
+      sub = 'Rule engine reviewing';
+    } else { sub = 'Funds returned in full'; }
+    return `<div class="dealcard" id="card-${d.id}">
+      <div class="dc-ring">${ringSvg(d.state)}<div class="st" style="color:${m.col}">${m.lbl}</div></div>
+      <div class="dc-body">
+        <h4>${d.title}</h4>
+        <div class="who">${d.creator}${d.type==='retainer' ? ' · monthly retainer' : ''}</div>
+        <div class="dc-amt">$${d.amt.toFixed(2)}</div>
+        <div class="dc-sub">${sub}</div>
+        <div class="dc-actions">${actions}</div>
+      </div>
+      <canvas class="paidburst"></canvas>
+    </div>`;
+  }).join('');
+}
+/* filter bar */
+(function(){
+  const fb=document.getElementById('vaultFilter');
+  if(fb) fb.querySelectorAll('.vf').forEach(b=>b.onclick=()=>{
+    vaultFilter=b.dataset.f; fb.querySelectorAll('.vf').forEach(x=>x.classList.toggle('on',x===b)); renderVault();
+  });
+})();
+function findDeal(id){ return deals.find(d => d.id === id); }
+function simPost(id){
+  const d = findDeal(id);
+  d.state = 'CONTENT_SUBMITTED'; d.hoursLeft = 72;
+  renderVault();
+  toast(`<b>${d.creator}</b> posted. Compliance autopilot: ✓ #ad present. 72h auto-release armed.`);
+}
+function cancelDeal(id){
+  const d = findDeal(id);
+  d.state = 'REFUNDED';
+  renderVault();
+  toast(`Deal cancelled — <b>$${d.amt.toFixed(2)}</b> refunded in full.`);
+}
+function verifyDeal(id){
+  const d = findDeal(id);
+  d.state = 'PAID';
+  d.roi = d.roi || {clicks: Math.floor(Math.random()*900+100), conv: Math.floor(Math.random()*40+5), rev: Math.floor(d.amt * (Math.random()*4+1))};
+  const net = d.amt * (1-FEE);
+  payouts.unshift({t: d.title + ' · your brand', amt: net, when: 'just now'});
+  renderVault();
+  burst(document.getElementById('card-'+id));
+  toast(`⚡ <b>$${net.toFixed(2)}</b> hit ${d.creator}'s account <b>0.8s</b> after your click. That's the whole product.`);
+}
+function disputeDeal(id){
+  const d = findDeal(id);
+  d.state = 'DISPUTED';
+  renderVault();
+  setTimeout(() => {
+    // published rule: content live + compliant + brief met → creator wins
+    d.state = 'PAID';
+    const net = d.amt * (1-FEE);
+    payouts.unshift({t: d.title + ' · dispute resolved', amt: net, when: 'just now'});
+    renderVault();
+    toast(`Rule engine: content was live & compliant → <b>creator paid</b>. Disputes need a concrete brief violation to win.`);
+  }, 2600);
+  toast(`Dispute opened. Running the published rules — no humans, no favorites.`);
+}
+/* gold burst on payout */
+function burst(card){
+  if (!card || reduced) return;
+  const c = card.querySelector('.paidburst');
+  c.width = card.offsetWidth * devicePixelRatio;
+  c.height = card.offsetHeight * devicePixelRatio;
+  const x = c.getContext('2d');
+  let ps = Array.from({length:26}, () => ({
+    x: c.width*.18, y: c.height*.5,
+    vx:(Math.random()-.2)*7*devicePixelRatio, vy:(Math.random()-.5)*7*devicePixelRatio,
+    life: 1, r: Math.random()*2.5+1
+  }));
+  (function anim(){
+    x.clearRect(0,0,c.width,c.height);
+    ps.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += .12*devicePixelRatio; p.life -= .022;
+      x.globalAlpha = Math.max(0,p.life);
+      x.fillStyle = '#F0B843'; x.shadowColor = '#F0B843'; x.shadowBlur = 10;
+      x.beginPath(); x.arc(p.x, p.y, p.r*devicePixelRatio, 0, 7); x.fill();
+    });
+    ps = ps.filter(p => p.life > 0);
+    if (ps.length) requestAnimationFrame(anim); else x.clearRect(0,0,c.width,c.height);
+  })();
+}
+
+/* =================== SIGNALS =================== */
+function renderSignals(){
+  const g = document.getElementById('sigGrid');
+  const withRoi = deals.filter(d => d.roi);
+  const sumEl = document.getElementById('sigSummary');
+  if (withRoi.length && sumEl){
+    const spend = withRoi.reduce((s,d)=>s+d.amt,0);
+    const rev = withRoi.reduce((s,d)=>s+d.roi.rev,0);
+    const clicks = withRoi.reduce((s,d)=>s+d.roi.clicks,0);
+    const roas = spend? (rev/spend):0;
+    const best = withRoi.reduce((a,b)=>(b.roi.rev/b.amt)>(a.roi.rev/a.amt)?b:a);
+    sumEl.innerHTML=`
+      <div class="vsum gold"><div class="lbl">Total spend</div><div class="val">$${spend.toFixed(0)}</div><div class="sub">${withRoi.length} tracked deals</div></div>
+      <div class="vsum mint"><div class="lbl">Revenue attributed</div><div class="val">$${rev.toLocaleString()}</div><div class="sub">${clicks.toLocaleString()} clicks tracked</div></div>
+      <div class="vsum copper"><div class="lbl">Blended ROAS</div><div class="val">${roas.toFixed(1)}×</div><div class="sub">across the portfolio</div></div>
+      <div class="vsum coral" style="--coral:var(--gold)"><div class="lbl">Top performer</div><div class="val" style="font-size:1.5rem;color:var(--gold)">${best.creator}</div><div class="sub">${(best.roi.rev/best.amt).toFixed(1)}× on $${best.amt.toFixed(0)}</div></div>`;
+  } else if(sumEl){ sumEl.innerHTML=''; }
+  if (!withRoi.length){ g.innerHTML = `<div class="empty">Return on your deals appears here once one is verified and paid. Verify a live deal in the Vault to see it light up.</div>`; return; }
+  g.innerHTML = withRoi.map(d => {
+    const roas = (d.roi.rev / d.amt).toFixed(2);
+    return `<div class="sigcard">
+      <h4>${d.title}</h4>
+      <div class="who">${d.creator} · $${d.amt.toFixed(2)} spend</div>
+      <span class="roas">${roas}×</span> <span class="roas-lbl">ROAS</span>
+      <div class="bars">
+        <div class="bar"><span>Clicks</span><div class="track"><div class="fill" data-w="${Math.min(100, d.roi.clicks/15)}"></div></div><span class="num">${d.roi.clicks.toLocaleString()}</span></div>
+        <div class="bar"><span>Conversions</span><div class="track"><div class="fill" data-w="${Math.min(100, d.roi.conv*1.6)}"></div></div><span class="num">${d.roi.conv}</span></div>
+        <div class="bar"><span>Revenue</span><div class="track"><div class="fill gold" data-w="${Math.min(100, d.roi.rev/30)}"></div></div><span class="num">$${d.roi.rev.toLocaleString()}</span></div>
+      </div>
+      <div class="sim"><button class="btn ghost" onclick="simConv('${d.id}')">+ simulate a conversion</button></div>
+    </div>`;
+  }).join('');
+  requestAnimationFrame(() => requestAnimationFrame(() =>
+    document.querySelectorAll('.sig-grid .fill').forEach(f => f.style.width = f.dataset.w + '%')));
+}
+function simConv(id){
+  const d = findDeal(id);
+  const sale = Math.floor(Math.random()*60+15);
+  d.roi.conv += 1; d.roi.rev += sale; d.roi.clicks += Math.floor(Math.random()*20+4);
+  renderSignals();
+  toast(`Tracked sale via ${d.creator}'s link: <b>+$${sale}</b> attributed.`);
+}
+
+/* =================== CREATOR: WALLET =================== */
+function renderWallet(){
+  const total = payouts.reduce((s,p) => s + p.amt, 0);
+  document.getElementById('wTotal').textContent = '$' + total.toFixed(2);
+  document.getElementById('payFeed').innerHTML = payouts.map(p => `
+    <div class="payrow">
+      <div class="l"><b>${p.t}</b><span>${p.when}</span></div>
+      <div class="r">+$${p.amt.toFixed(2)}<span>⚡ instant</span></div>
+    </div>`).join('');
+}
+
+/* =================== CREATOR STUDIO (mirrors /api/studio/* endpoints) =================== */
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const SLOTS = ['6 AM','9 AM','12 PM','3 PM','6 PM','9 PM'];
+
+/* ---- PULSE ---- */
+function renderPulse(){
+  const goldenD = 'Thu', goldenS = '6 PM';
+  document.getElementById('pulseInsights').innerHTML = [
+    ['2.8×','Your followers save <b style="color:var(--ink)">carousels</b> 2.8× more than any other format'],
+    ['3.1×','Posts in your <b style="color:var(--ink)">Thu 6–9 PM</b> window convert 3.1× better'],
+    ['+42%','<b style="color:var(--ink)">Question-style hooks</b> hold your viewers 42% longer'],
+  ].map(([s,t]) => `<div class="insight"><div class="stat">${s}</div><p>${t}</p></div>`).join('');
+  document.getElementById('goldenNote').textContent = `Next golden window: ${goldenD} ${goldenS}.`;
+  let hm = '<div class="hd"></div>' + SLOTS.map(s => `<div class="hd">${s}</div>`).join('');
+  DAYS.forEach((d,di) => {
+    hm += `<div class="hd">${d}</div>`;
+    SLOTS.forEach((s,si) => {
+      let v = ((di*7+si*13) % 45) + 10;
+      if (d===goldenD) v += 25;
+      if (s===goldenS) v += 30;
+      if (si>=3) v += 12;
+      v = Math.min(100,v);
+      const isGold = d===goldenD && s===goldenS;
+      hm += `<div class="cell ${isGold?'gold':''}" style="background:rgba(255,194,75,${(v/100*.75).toFixed(2)})" title="${d} ${s} — ${v}/100 engagement index"></div>`;
+    });
+  });
+  document.getElementById('heatmap').innerHTML = hm;
+  document.getElementById('autopsies').innerHTML = [
+    {t:'The one that popped', f:'carousel', r:'118K reach · 4.1K saves', why:['Swipe-through held attention — re-served to non-finishers','Posted in your Thu 6 PM golden window','Question hook out-held your average by 42%']},
+    {t:'Steady performer', f:'reel', r:'61K reach · 1.2K shares', why:['Strong first-3-seconds retention','Trending audio matched to niche']},
+    {t:'The sleeper hit', f:'reel', r:'44K reach · 890 saves', why:['"Save this" CTA — saves are the #1 signal','Keyword-rich caption indexed in search']},
+  ].map(a => `<div class="autopsy"><div class="top"><b>${a.t}</b><span class="mono">${a.f.toUpperCase()} · ${a.r}</span></div><div class="whychips">${a.why.map(w=>`<span class="whychip">✓ ${w}</span>`).join('')}</div></div>`).join('');
+}
+
+/* ---- REACH DOCTOR ---- */
+function runReachDoctor(){
+  const before = +document.getElementById('rdBefore').value||0, now = +document.getElementById('rdNow').value||0;
+  const ppw = +document.getElementById('rdPosts').value||0, reels = +document.getElementById('rdReels').value||0;
+  const drop = before>0 ? Math.round((1-now/before)*100) : 0;
+  const dx = [];
+  if (reels < 40) dx.push(['high','Format mix is stale',`Only ${reels}% reels — the algorithm distributes reels & carousels far wider than photos now. Target 50–60% reels.`]);
+  if (ppw < 2) dx.push(['high','Inconsistent cadence','Under 2 posts/week signals inactive. 3–5/week sustained beats 10 in a burst.']);
+  if (ppw > 10) dx.push(['med','Flooding','Back-to-back posts suppress each other. Cap at 1–2/day.']);
+  if (drop > 25) dx.push(['med','Possible dead-zone posting','First-hour engagement decides distribution. Post only in your Pulse golden windows for 2 weeks.']);
+  if (!dx.length) dx.push(['low','No structural problem found','Fundamentals look right — likely normal variance. Hold course 2–3 weeks before pivoting.']);
+  document.getElementById('rdOut').innerHTML =
+    `<p class="mono" style="font-size:.75rem;color:${drop>0?'var(--coral)':'var(--mint)'};margin-bottom:12px">REACH CHANGE: ${drop>0?'-':'+'}${Math.abs(drop)}%</p>` +
+    dx.map(([s,i,f]) => `<div class="diag ${s}"><b>${i}</b><p>${f}</p></div>`).join('');
+}
+
+/* ---- HOOK LAB ---- */
+function runHook(){
+  const text = document.getElementById('hookInput').value.trim();
+  if (!text) return;
+  const words = text.split(/\s+/);
+  let score = 40; const notes = [];
+  if (words.length <= 12){ score += 15; notes.push([1,`Tight — ${words.length} words fits the 3-second read window`]); }
+  else notes.push([0,`${words.length} words is long — viewers decide in 3 seconds; aim ≤ 12`]);
+  if (/\?$|^(why|how|what|would you|did you)/i.test(text)){ score += 15; notes.push([1,'Question framing — invites a mental answer, boosts hold']); }
+  else notes.push([0,'No question framing — questions make viewers pause']);
+  if (/\d/.test(text)){ score += 10; notes.push([1,'Contains a number — specificity signals substance']); }
+  else notes.push([0,'No number — "3 mistakes" beats "some mistakes"']);
+  if (/secret|nobody|mistake|truth|wrong|hidden|stop|never|why|actually|real reason/i.test(text)){ score += 12; notes.push([1,'Curiosity gap — viewers stay to close the loop']); }
+  else notes.push([0,'No curiosity gap — tease what they don\'t know yet']);
+  if (/^(hey guys|hi everyone|welcome back|so today|in this video)/i.test(text)){ score -= 18; notes.push([0,'Generic opener — "hey guys / welcome back" is scroll-past fuel']); }
+  score = Math.max(5, Math.min(100, score));
+  document.getElementById('hookOut').style.display = '';
+  document.getElementById('hookScore').textContent = score;
+  document.getElementById('hookVerdict').textContent = score>=75 ? 'SCROLL-STOPPER' : score>=50 ? 'SHARPEN IT' : 'SCROLL-PAST RISK';
+  const arc = document.getElementById('hookArc');
+  arc.style.stroke = score>=75 ? 'var(--gold)' : score>=50 ? 'var(--violet)' : 'var(--coral)';
+  arc.style.strokeDashoffset = 402 - (402*score/100);
+  document.getElementById('hookNotes').innerHTML = notes.map(([ok,t]) =>
+    `<div class="checkrow ${ok?'good':'bad'}"><span class="m">${ok?'✓':'✗'}</span><span>${t}</span></div>`).join('');
+  const stub = words.slice(0,4).join(' ').toLowerCase();
+  document.getElementById('hookRewrites').innerHTML = [
+    `Question: "Why does ${stub}…?"`,
+    `Number: "3 things about ${stub} nobody tells you"`,
+    `Gap: "The real reason ${stub} isn't what you think"`,
+  ].map(r => `<div class="checkrow good"><span class="m">→</span><span>${r}</span></div>`).join('');
+}
+
+/* ---- CAPTION PRE-FLIGHT ---- */
+const GENERIC_TAGS = ['#love','#instagood','#follow','#like4like','#followme','#viral','#reels','#fyp','#explore','#explorepage','#instadaily','#trending'];
+const KWS = ['recipe','restaurant','street food','cafe','cooking','foodie','breakfast','dinner','taste'];
+function runCaption(){
+  const cap = document.getElementById('capInput').value;
+  if (!cap.trim()) return;
+  const items = []; let score = 30;
+  const tags = cap.match(/#[\w]+/g) || [];
+  const generic = tags.filter(t => GENERIC_TAGS.includes(t.toLowerCase()));
+  if (tags.length >= 3 && tags.length <= 10){ score += 15; items.push([1,`${tags.length} hashtags — inside the 3–10 sweet spot`]); }
+  else if (!tags.length) items.push([0,'No hashtags — 3–10 niche tags still help categorization']);
+  else items.push([0,`${tags.length} hashtags — over 10 reads as spam`]);
+  if (generic.length){ score -= 10; items.push([0,`Generic tags hurt in 2026: ${generic.join(' ')} — swap for niche tags`]); }
+  else if (tags.length){ score += 10; items.push([1,'No junk tags — every tag is doing work']); }
+  const found = KWS.filter(k => cap.toLowerCase().includes(k));
+  if (found.length >= 2){ score += 20; items.push([1,`Social SEO strong — keywords: ${found.slice(0,3).join(', ')}`]); }
+  else items.push([0,`Weak keyword SEO — captions now outrank hashtags for discovery. Work in: ${KWS.slice(0,3).join(', ')}`]);
+  if (/save this|share this|send this|comment|tag someone|which one/i.test(cap)){ score += 15; items.push([1,'Has a save/share CTA — the #1 ranking signal']); }
+  else items.push([0,'No save/share CTA — saves & sends are what the algorithm rewards most']);
+  if (cap.length >= 125){ score += 10; items.push([1,'Long enough for keyword indexing']); }
+  items.push(/#ad\b|#sponsored\b|paid partnership/i.test(cap)
+    ? [1,'Disclosure present — sponsored-ready']
+    : [0,'No disclosure — fine for organic; add #ad before submitting a PAKT deal']);
+  score = Math.max(5, Math.min(100, score));
+  document.getElementById('capOut').innerHTML =
+    `<p class="mono" style="font-size:.85rem;color:${score>=70?'var(--mint)':score>=45?'var(--gold)':'var(--coral)'};margin-bottom:8px">PRE-FLIGHT SCORE: ${score}/100</p>` +
+    items.map(([ok,t]) => `<div class="checkrow ${ok?'good':'bad'}"><span class="m">${ok?'✓':'✗'}</span><span>${t}</span></div>`).join('');
+}
+
+/* ---- IDEA ENGINE ---- */
+const ANGLES = ['3 mistakes everyone makes with','What nobody tells you about','I tested {} for 7 days','Beginner vs pro:','The 60-second guide to','Ranking the most overrated','POV: your first time trying','The budget version of'];
+const TOPICS = ['street food in your city','a 20-rupee breakfast','restaurant menus','homemade chai','late-night eats','tiffin spots'];
+const WHYS = ['saves-bait: people bookmark lists','share-bait: friends tag friends','watch-time: curiosity holds to the end','comment-bait: sparks debate','relatability: DM-share magnet'];
+let ideaSeed = 0;
+function renderIdeas(remix){
+  if (remix) ideaSeed += 7;
+  const fmts = ['REEL','CAROUSEL','REEL','STORY POLL','CAROUSEL'];
+  const signals = ['saves','shares','watch time','comments','saves'];
+  const efforts = ['15 min','30 min','45 min','10 min','1 hour'];
+  document.getElementById('ideaList').innerHTML = Array.from({length:5}, (_,i) => {
+    const a = ANGLES[(i*3 + ideaSeed) % ANGLES.length], t = TOPICS[(i*2 + ideaSeed) % TOPICS.length];
+    const idea = a.includes('{}') ? a.replace('{}', t) : `${a} ${t}`;
+    return `<div class="ideacard">
+      <div class="ic-top">
+        <div><b>${idea}</b><div class="why"><span class="sig">▲</span> ${WHYS[(i+ideaSeed)%5]}</div></div>
+        <span class="fmt">${fmts[i]}</span>
+      </div>
+      <div class="ic-tags">
+        <span class="ic-tag">Rewards ${signals[i]}</span>
+        <span class="ic-tag effort">⏱ ${efforts[i]} to make</span>
+        <button class="mk" onclick="location.href='forge.html'">Make it in the Forge →</button>
+      </div>
+    </div>`;
+  }).join('');
+  renderPostTimes(); renderWeekPlan();
+  if (remix) toast('<b>5 fresh ideas</b> — remixed for today.');
+}
+const POST_TIMES = [
+  ['Mon','7:30 PM',false],['Tue','1:00 PM',false],['Wed','8:00 PM',true],
+  ['Thu','7:00 PM',false],['Fri','6:30 PM',false],['Sat','11:00 AM',true],['Sun','9:00 AM',false],
+];
+function renderPostTimes(){
+  const el = document.getElementById('postTimes'); if(!el) return;
+  el.innerHTML = POST_TIMES.map(([d,s,best]) =>
+    `<div class="ptime"><span class="day">${d}</span><span class="slot">${s}${best?'<span class="bestbadge">Peak</span>':''}</span></div>`).join('');
+}
+const WEEK_PLAN = [
+  ['Mon','REEL','How-to / quick recipe','var(--gold)','#231a05'],
+  ['Tue','STORY','Behind the scenes + poll','var(--copper)','#fff'],
+  ['Wed','CAROUSEL','Listicle / "save this"','var(--mint)','#0c1a12'],
+  ['Thu','REEL','Trend or duet','var(--gold)','#231a05'],
+  ['Fri','POST','Community / your face','var(--copper)','#fff'],
+  ['Sat','REEL','Your best idea of the week','var(--gold)','#231a05'],
+  ['Sun','REST','Rest or reply to DMs','var(--line)','var(--dim)'],
+];
+function renderWeekPlan(){
+  const el = document.getElementById('weekPlan'); if(!el) return;
+  el.innerHTML = WEEK_PLAN.map(([d,f,t,bg,fg]) =>
+    `<div class="wp"><span class="wd">${d}</span><span class="wf" style="background:${bg};color:${fg}">${f}</span><span class="wt">${t}</span></div>`).join('');
+}
+function renderKit(){
+  const tc = document.getElementById('topContent');
+  if(tc) tc.innerHTML = [
+    ['🍜','Street food breakfast tour','Reel · 214K views','214K'],
+    ['☕','Best filter coffee in the city','Carousel · 41K saves','41K'],
+    ['🥘','₹100 thali challenge','Reel · 128K views','128K'],
+  ].map(([e,t,s,n]) => `<div class="topc"><div class="tcimg" style="background:var(--panel2)">${e}</div><div class="tcmeta"><b>${t}</b><span>${s}</span></div><span class="tcnum">${n}</span></div>`).join('');
+  const ab = document.getElementById('audienceBreak');
+  if(ab){
+    const rows = [['Women 18–34',52],['Men 18–34',31],['Hyderabad',44],['Other India',48],['Watch to end',63]];
+    ab.innerHTML = `<div class="abreak">${rows.map(([l,v]) =>
+      `<div class="abrow"><div class="abtop"><span>${l}</span><span>${v}%</span></div><div class="abtrack"><div class="abfill" data-w="${v}"></div></div></div>`).join('')}</div>`;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>ab.querySelectorAll('.abfill').forEach(f=>f.style.width=f.dataset.w+'%')));
+  }
+  const bl = document.getElementById('brandLogos');
+  if(bl) bl.innerHTML = ['Kova Coffee','Brew District','Deccan Eats','Chai Point','Local Table'].map(b=>`<span class="blogo">${b}</span>`).join('');
+}
+
+/* =================== THE TABLE (mirrors /api/negotiations/*) =================== */
+let NEG = {
+  status: 'open',
+  offers: [
+    {by:'brand', name:'Kova Coffee', amt:200, note:'Our standard rate for this scope.', t:'2h ago', status:'superseded'},
+    {by:'creator', name:'@demo.creator', amt:320, note:'Launch-week slots are premium.', t:'1h ago', status:'superseded'},
+    {by:'brand', name:'Kova Coffee', amt:260, note:'Meet in the middle?', t:'40m ago', status:'pending'},
+  ],
+  chat: [
+    {by:'creator', name:'@demo.creator', text:'Can include one story repost same day if we close this week.', red:false},
+  ],
+  agreed: null,
+};
+const CONTACT_RX = [/[\w.+-]+@[\w-]+\.[\w.]{2,}/g, /(\+?\d[\d\s\-()]{8,}\d)/g, /\b(whats\s?app|telegram|signal)\b[^.!?\n]{0,24}/gi];
+function myRole(){ return document.getElementById('roleBrand').classList.contains('on') ? 'brand' : 'creator'; }
+
+function renderTable(){
+  const standing = NEG.offers[NEG.offers.length-1];
+  const me = myRole();
+  document.getElementById('offerLedger').innerHTML = NEG.offers.map((o,i) => {
+    const mine = o.by === me;
+    const col = o.by === 'brand' ? 'var(--violet)' : 'var(--gold)';
+    const stateChip = o.status === 'accepted' ? '<span style="color:var(--mint)">✓ ACCEPTED</span>'
+      : o.status === 'pending' ? '<span style="color:var(--gold)">STANDING OFFER</span>'
+      : '<span style="color:var(--dim)">superseded</span>';
+    return `<div class="autopsy" style="margin-bottom:10px;border-left:3px solid ${col};${mine?'margin-left:40px':'margin-right:40px'}">
+      <div class="top"><b>${o.name} ${mine?'(you)':''}</b><span class="mono" style="font-size:.6rem">${o.t} · ${stateChip}</span></div>
+      <div style="display:flex;align-items:baseline;gap:12px;margin-top:8px">
+        <span class="mono" style="font-size:1.5rem;color:${o.status==='superseded'?'var(--dim)':col};${o.status==='superseded'?'text-decoration:line-through':''}">$${o.amt}</span>
+        ${o.note?`<span style="font-size:.78rem;color:var(--dim)">"${o.note}"</span>`:''}
+      </div></div>`;
+  }).join('');
+  const closed = NEG.status !== 'open';
+  document.getElementById('negActions').style.display = closed ? 'none' : '';
+  document.getElementById('negStatus').textContent = NEG.status.toUpperCase();
+  document.getElementById('negStatus').style.color = NEG.status==='agreed' ? 'var(--mint)' : NEG.status==='declined' ? 'var(--coral)' : 'var(--gold)';
+  if (!closed){
+    const yourTurn = standing.by !== me;
+    document.getElementById('turnNote').textContent = yourTurn ? 'Your move — accept or counter' : 'Your offer stands — waiting on the other side';
+    document.querySelectorAll('#negActions .btn').forEach(b => b.disabled = !yourTurn);
+  }
+  const ag = document.getElementById('agreementCard');
+  if (NEG.agreed){
+    ag.style.display = '';
+    document.getElementById('agAmt').textContent = '$' + NEG.agreed.amt + '.00';
+    document.getElementById('agBy').textContent = NEG.agreed.by;
+    document.getElementById('agHash').textContent = NEG.agreed.hash;
+    document.getElementById('fundAgreed').style.display = (me==='brand' && !NEG.agreed.funded) ? '' : 'none';
+  } else ag.style.display = 'none';
+  document.getElementById('negChat').innerHTML = NEG.chat.map(m =>
+    `<div class="checkrow ${m.red?'bad':'good'}" style="border:none;padding:6px 0"><span class="m">${m.red?'⚠':'💬'}</span><span><b style="font-weight:500;color:var(--ink)">${m.name}:</b> ${m.text}</span></div>`).join('');
+}
+function negCounter(){
+  const standing = NEG.offers[NEG.offers.length-1];
+  if (standing.by === myRole()) return;
+  const amt = +document.getElementById('counterAmt').value;
+  if (!amt || amt < 5) return toast('Enter a counter amount first.');
+  standing.status = 'superseded';
+  NEG.offers.push({by: myRole(), name: myRole()==='brand'?'Kova Coffee':'@demo.creator', amt,
+    note: document.getElementById('counterNote').value.trim(), t:'just now', status:'pending'});
+  document.getElementById('counterAmt').value = ''; document.getElementById('counterNote').value = '';
+  renderTable();
+  toast('<b>Counter on the ledger.</b> The other side has been notified.');
+}
+function negAccept(){
+  const standing = NEG.offers[NEG.offers.length-1];
+  if (standing.by === myRole()) return;
+  standing.status = 'accepted';
+  NEG.status = 'agreed';
+  const hash = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b=>b.toString(16).padStart(2,'0')).join('');
+  NEG.agreed = {amt: standing.amt, by: myRole()==='brand'?'Kova Coffee':'@demo.creator', hash, funded:false};
+  renderTable();
+  toast(`<b>Agreement sealed at $${standing.amt}.</b> Terms fingerprinted — this number can never be disputed.`);
+}
+function negDecline(){
+  const standing = NEG.offers[NEG.offers.length-1];
+  if (standing.by === myRole()) return;
+  NEG.status = 'declined'; renderTable();
+  toast('Negotiation declined and archived on the ledger.');
+}
+function negChat(){
+  const inp = document.getElementById('chatInput');
+  let text = inp.value.trim();
+  if (!text) return;
+  let red = false;
+  CONTACT_RX.forEach(rx => { if (rx.test(text)){ red = true; text = text.replace(rx, '[hidden — keep deals on PAKT to stay protected]'); } rx.lastIndex = 0; });
+  NEG.chat.push({by: myRole(), name: myRole()==='brand'?'Kova Coffee':'@demo.creator', text, red});
+  inp.value = '';
+  renderTable();
+  if (red) toast('⚠ <b>Contact info hidden.</b> Off-platform deals lose escrow, disputes & verified history.');
+}
+function fundFromAgreement(){
+  NEG.agreed.funded = true;
+  deals.unshift({id:'d'+Date.now(), creator:'@demo.creator', title:'Diwali launch reel', amt: NEG.agreed.amt, state:'FUNDED'});
+  renderTable();
+  toast(`⚡ <b>$${NEG.agreed.amt}.00 locked in escrow</b> — the exact agreed number, pulled from the ledger. Check the Vault.`);
+}
+
+/* cinematic cursor */
+(function(){
+  if (matchMedia('(hover:none)').matches) return;
+  const dot = document.querySelector('.cursor'), ring = document.querySelector('.cursor-ring');
+  let mx = innerWidth/2, my = innerHeight/2, rx = mx, ry = my;
+  addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.transform = `translate(${mx}px,${my}px)`; });
+  (function loop(){ rx += (mx-rx)*.16; ry += (my-ry)*.16; ring.style.transform = `translate(${rx}px,${ry}px)`; requestAnimationFrame(loop); })();
+  document.addEventListener('mouseover', e => {
+    if (e.target.closest('button, a, .chip, canvas, input, textarea')) ring.classList.add('big');
+    else ring.classList.remove('big');
+  });
+})();
+
+/* =================== WELCOME GATE + ONBOARDING =================== */
+const ONBOARD = {
+  creator: {
+    kicker: "You're all set, creator",
+    h: "Three taps to your first payout.",
+    steps: [
+      ["Set up in a minute","Add your handle and niche — being found is free."],
+      ["Agree a price at The Table","A brand offers, you counter, you both lock it in."],
+      ["Post, and get paid","The money's already in the vault. It's yours the second you go live."],
+    ],
+    enter: 'creator',
+  },
+  brand: {
+    kicker: "You're all set",
+    h: "Three taps to your first deal.",
+    steps: [
+      ["Find real creators","Browse the floor — trust scores show who's genuine."],
+      ["Agree a price at The Table","Offer, counter, and lock the exact number."],
+      ["Only pay on proof","Your money stays locked until the post is verified."],
+    ],
+    enter: 'brand',
+  },
+};
+const welcome = document.getElementById('welcome');
+function paintOnboard(role){
+  const o = ONBOARD[role];
+  document.getElementById('wStep1').style.display = 'none';
+  document.getElementById('wStep2').style.display = '';
+  document.getElementById('wOnbKicker').textContent = o.kicker;
+  document.getElementById('wOnbH').textContent = o.h;
+  document.getElementById('wOnbSteps').innerHTML = o.steps.map((s,i) =>
+    `<div class="w-onbstep"><span class="num">${i+1}</span><div><b>${s[0]}</b><span>${s[1]}</span></div></div>`).join('');
+  document.getElementById('wStart').onclick = () => enterApp(role);
+}
+function enterApp(role){
+  setRole(role);
+  try{ localStorage.setItem('pakt_role', role); localStorage.setItem('pakt_seen', '1'); }catch(e){}
+  welcome.classList.add('gone');
+}
+document.querySelectorAll('.w-card').forEach(c =>
+  c.addEventListener('click', () => paintOnboard(c.dataset.pick)));
+document.getElementById('wSkip').addEventListener('click', () => enterApp('brand'));
+
+/* entry routing: honor ?role= from the landing page, else remember last choice */
+(function bootWelcome(){
+  const q = new URLSearchParams(location.search).get('role');
+  if (q === 'creator' || q === 'brand'){
+    // came from a landing button — skip the picker, show that role's quick orientation
+    paintOnboard(q);
+    return;
+  }
+  let seen = false, last = null;
+  try{ seen = localStorage.getItem('pakt_seen') === '1'; last = localStorage.getItem('pakt_role'); }catch(e){}
+  if (seen && (last === 'creator' || last === 'brand')){
+    setRole(last);
+    welcome.classList.add('gone');   // returning user — straight in, no gate
+  }
+  // otherwise: leave the picker (wStep1) showing
+})();
+
+/* boot */
+renderDiscover();
+renderVault();
+
+/* =================== boot ===================
+   Nothing renders from a constant any more: the gate opens, the token is
+   exchanged, and every screen fills from the API. */
+document.getElementById('authGo').addEventListener('click', doAuth);
+document.getElementById('authPass').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
+document.getElementById('authEmail').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
+document.querySelectorAll('.authrole').forEach(b =>
+  b.addEventListener('click', () => setAuthRole(b.dataset.role)));
+document.getElementById('authToggle').addEventListener('click', async () => {
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  const signup = authMode === 'signup';
+  document.getElementById('authRoles').hidden = !signup;
+  document.getElementById('authName').hidden = !signup;
+  document.getElementById('authGo').textContent = signup ? 'Create account' : 'Sign in';
+  document.getElementById('authToggle').textContent = signup
+    ? 'Already have an account? Sign in' : 'No account? Create one';
+  if (signup) await fillNicheSelect();
+  setAuthRole(authRole);
+});
+boot();
+</script>
+</body>
+</html>
